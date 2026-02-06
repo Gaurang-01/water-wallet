@@ -1,207 +1,280 @@
-/* Layout */
+:root {
+  --primary: #2e7d32;
+  --bg-card: #ffffff;
+  --border: #e2e8f0;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --danger-bg: #fef2f2;
+  --danger-border: #fecaca;
+  --safe-bg: #f0fdf4;
+  --safe-border: #bbf7d0;
+}
+
+/* Page Layout */
+.planner-page {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+.header-row h1 { font-size: 1.5rem; margin: 0; color: var(--primary); }
+.header-row p { margin: 5px 0 0; color: var(--text-secondary); }
+
+.lang-btn {
+  background: white; border: 1px solid var(--primary);
+  padding: 8px 16px; border-radius: 20px; cursor: pointer;
+}
+
+/* Responsive Grid */
 .planner-container {
   display: grid;
   grid-template-columns: 1fr;
   gap: 30px;
-  margin-top: 20px;
 }
 
-/* Tablet/Desktop: Split layout */
 @media (min-width: 768px) {
   .planner-container {
-    grid-template-columns: 1fr 1.5fr;
+    grid-template-columns: 1fr 1.5fr; /* Split on Desktop */
     align-items: start;
   }
 }
 
-.page-header h1 {
-  font-size: 1.8rem;
-  color: var(--text-primary);
-  margin-bottom: 5px;
-}
-.page-header p {
-  color: var(--text-secondary);
-}
-
-/* Input Card Styling */
+/* Input Card */
 .input-card {
   background: var(--bg-card);
-  border: 1px solid var(--border);
-  padding: 24px;
+  padding: 25px;
   border-radius: 16px;
-  box-shadow: var(--shadow);
-  height: fit-content;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border);
 }
 
-.form-group {
-  margin-bottom: 20px;
+.gps-btn {
+  width: 100%; padding: 12px;
+  background: #eff6ff; color: #1d4ed8;
+  border: 1px dashed #bfdbfe; border-radius: 8px;
+  font-weight: 600; cursor: pointer;
 }
+
+.or-divider { text-align: center; color: #94a3b8; margin: 15px 0; font-size: 0.9rem; }
 
 .form-group label {
-  display: block;
-  margin-bottom: 8px;
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  font-weight: 600;
+  display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-primary);
 }
-
-.form-group select, 
 .form-group input {
-  width: 100%;
-  padding: 14px;
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  font-family: inherit;
-  font-size: 1rem;
-  color: var(--text-primary);
-  transition: border-color 0.2s;
+  width: 100%; padding: 12px; border: 1px solid var(--border);
+  border-radius: 8px; font-size: 1rem; box-sizing: border-box; /* Fixes width issues */
 }
 
-.form-group select:focus,
-.form-group input:focus {
-  outline: none;
-  border-color: var(--water-accent);
-}
-
-.btn-primary {
-  width: 100%;
-  justify-content: center;
-  display: flex;
-}
-
-/* --- Result Cards --- */
-.result-area {
-  animation: slideIn 0.4s ease-out;
-}
-
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.alert-card {
-  padding: 24px;
-  border-radius: 16px;
-  border-left: 6px solid transparent;
-}
-
-/* Danger Theme */
-.alert-card.danger {
-  background: var(--danger-bg);
-  border: 1px solid var(--danger-border);
-  border-left-color: var(--danger);
-}
-
-/* Safe Theme */
-.alert-card.safe {
-  background: var(--safe-bg);
-  border: 1px solid var(--safe-border);
-  border-left-color: var(--safe);
-}
-
-.alert-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 15px;
-}
-
-.alert-header h2 {
-  font-size: 1.4rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.icon-lg { font-size: 2rem; }
-.danger .icon-lg { color: var(--danger); }
-.safe .icon-lg { color: var(--safe); }
-.danger h2 { color: #991b1b; }
-.safe h2 { color: #166534; }
-
-.result-desc {
-  font-size: 1.1rem;
-  color: #334155;
+/* --- NEW SEARCHABLE DROPDOWN STYLES --- */
+.searchable-dropdown {
+  position: relative; /* Crucial for floating list */
   margin-bottom: 20px;
 }
 
-/* Water Math Section */
+.searchable-dropdown label {
+  display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-primary);
+}
+
+.dropdown-input {
+  width: 100%; padding: 12px; border: 1px solid var(--border);
+  border-radius: 8px; font-size: 1rem;
+  background: #fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>') no-repeat right 12px center;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.dropdown-list {
+  position: absolute;
+  top: 100%; left: 0; right: 0;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-top: 5px;
+  max-height: 200px; /* Limits height so it scrolls */
+  overflow-y: auto;
+  z-index: 100; /* Floats above everything */
+  list-style: none;
+  padding: 0;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-list li {
+  padding: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f5f9;
+}
+.dropdown-list li:hover { background: #f8fafc; color: var(--primary); }
+
+/* Buttons */
+.btn-primary {
+  width: 100%; padding: 14px; margin-top: 20px;
+  background: var(--primary); color: white;
+  border: none; border-radius: 8px; font-size: 1.1rem;
+  cursor: pointer; transition: background 0.2s;
+}
+.btn-primary:hover { background: #15803d; }
+.btn-primary:disabled { background: #94a3b8; }
+
+/* Results */
+.alert-card {
+  padding: 24px; border-radius: 16px; border: 1px solid transparent;
+}
+.alert-card.safe { background: var(--safe-bg); border-color: var(--safe-border); }
+.alert-card.danger { background: var(--danger-bg); border-color: var(--danger-border); }
+
+.alert-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+.alert-header h2 { margin: 0; font-size: 1.2rem; }
+.icon-lg { font-size: 1.5rem; }
+
 .water-math {
-  background: rgba(255, 255, 255, 0.6);
-  padding: 16px;
-  border-radius: 12px;
-  margin-bottom: 25px;
-  border: 1px dashed var(--danger-border);
+  background: rgba(255,255,255,0.7);
+  padding: 15px; border-radius: 12px;
 }
-.water-math.safe-border { border-color: var(--safe-border); }
+.math-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+.math-row.green { color: #166534; font-weight: 600; }
+.math-row.red { color: #b91c1c; font-weight: 600; }
+.math-row.total { margin-top: 10px; font-weight: 800; font-size: 1.1rem; }
+.divider { border: 0; border-top: 1px dashed #cbd5e1; }
 
-.math-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 6px 0;
-  font-size: 1rem;
+.sowing-box {
+  background: #eff6ff; border: 1px solid #dbeafe;
+  padding: 15px; border-radius: 8px; margin-top: 15px;
+}
+.fail-reason { color: #b91c1c; margin-top: 15px; font-weight: 500; }
+
+/* Swap Cards */
+.smart-swap { margin-top: 25px; }
+.smart-swap h3 { color: #b45309; font-size: 1rem; margin-bottom: 15px; }
+
+.swap-card {
+  background: white; border: 1px solid var(--border);
+  padding: 15px; border-radius: 10px;
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.swap-card h4 { margin: 0 0 5px 0; }
+.small-text { font-size: 0.85rem; color: var(--text-secondary); margin: 0; }
+.swap-profit { display: flex; flex-direction: column; text-align: right; }
+.swap-profit strong { color: #166534; }
+/* ... Keep your existing basic layout CSS ... */
+
+.reason-text {
+    margin: 5px 0 0;
+    font-size: 0.95rem;
+    color: #475569;
 }
 
-.math-row.red { color: var(--danger); font-weight: bold; }
-.math-row.green { color: var(--safe); font-weight: bold; }
-.math-row.total { font-weight: 800; font-size: 1.1rem; padding-top: 10px; }
-.divider { border: 0; border-top: 1px solid rgba(0,0,0,0.1); margin: 5px 0; }
+.profit-box {
+    margin-top: 15px;
+    background: #ffffff;
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.1rem;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
 
-/* Smart Swap Card */
-.smart-swap h3 {
-  font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #b45309; /* Deep Orange/Brown */
-  margin-bottom: 12px;
+/* SMART SWAP CARDS */
+.smart-swap { margin-top: 30px; }
+.smart-swap h3 { 
+    color: #b45309; 
+    font-size: 1.1rem; 
+    margin-bottom: 15px; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px;
 }
 
 .swap-card {
-  background: white;
-  border: 1px solid var(--border);
-  padding: 16px;
-  border-radius: 12px;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 15px;
-  align-items: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 15px;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    transition: transform 0.2s;
+}
+.swap-card:hover { transform: translateY(-2px); border-color: #cbd5e1; }
+
+.swap-badge {
+    position: absolute;
+    top: -10px; right: 15px;
+    background: #2563eb;
+    color: white;
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
 }
 
-/* Mobile responsive swap card */
-@media (max-width: 500px) {
-  .swap-card {
-    grid-template-columns: 1fr;
-    text-align: center;
-  }
-  .btn-outline.small { width: 100%; margin-top: 10px; }
+.swap-details h4 { margin: 0; font-size: 1.1rem; color: #1e293b; }
+.swap-details p { margin: 4px 0 0; font-size: 0.9rem; color: #64748b; }
+
+.swap-metrics {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px dashed #e2e8f0;
 }
 
-.swap-icon { font-size: 1.5rem; }
+.metric { display: flex; flex-direction: column; }
+.metric.ppd { text-align: right; }
 
-.swap-info h4 {
-  color: var(--text-primary);
-  font-weight: 700;
-  margin-bottom: 4px;
+.metric .label { font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px; }
+.metric .value { font-weight: 700; color: #334155; font-size: 1rem; }
+.metric.ppd .value { color: #2563eb; } /* Blue for Profit Per Drop */
+/* ... Previous CSS ... */
+
+/* New Header Layout inside Swap Card */
+.swap-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
 }
 
-.swap-info p {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
+.type-pill {
+    font-size: 0.7rem;
+    background: #f1f5f9;
+    color: #64748b;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-weight: 600;
 }
 
-.swap-profit {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+/* Metadata (Duration & Sowing) */
+.swap-meta {
+    display: flex;
+    gap: 15px;
+    font-size: 0.85rem;
+    color: #475569;
+    margin-bottom: 12px;
 }
-@media (max-width: 500px) { .swap-profit { align-items: center; } }
 
-.swap-profit span { font-size: 0.75rem; color: var(--text-secondary); }
-.swap-profit strong { color: var(--safe); font-size: 1.1rem; }
-
-.btn-outline.small {
-  padding: 6px 12px;
-  font-size: 0.9rem;
-  height: fit-content;
+/* Badge Variations */
+.swap-badge {
+    position: absolute;
+    top: -10px; right: 15px;
+    font-size: 0.75rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 700;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
+.swap-badge.now { background: #16a34a; color: white; } /* Green */
+.swap-badge.wait { background: #ea580c; color: white; } /* Orange */
+
+/* Make sure the profit metric pops */
+.metric.ppd .value { color: #2563eb; }
