@@ -20,10 +20,12 @@ body {
 }
 
 .planner-page {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
+    width: 100%;
+    min-height: 100%;
+    padding: 30px 40px;
+    box-sizing: border-box;
 }
+
 
 /* --- HEADER --- */
 .header-row {

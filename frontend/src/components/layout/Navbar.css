@@ -1,0 +1,94 @@
+/* ===== NAVBAR ===== */
+
+.top-navbar {
+  height: 65px;
+  width: 100%;
+  box-sizing: border-box;
+
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 32px;
+
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* Brand */
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #059669;
+}
+
+/* Menu */
+.nav-links {
+  display: flex;
+  gap: 28px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  font-weight: 600;
+  color: #475569;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: 0.2s;
+}
+
+.nav-links a:hover {
+  background: #f1f5f9;
+}
+
+.nav-links a.active {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+/* User */
+.nav-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Language button */
+.lang-toggle {
+  border: 2px solid #059669;
+  background: white;
+  color: #059669;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.lang-toggle:hover {
+  background: #059669;
+  color: white;
+}

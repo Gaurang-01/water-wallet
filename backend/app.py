@@ -16,7 +16,7 @@ app = Flask(__name__)
 CORS(app)
 
 # ==========================================
-# 1. THE AI BRAIN (Powered by CSV)
+# 1. THE AI BRAIN (Powered by CSV or Simulation)
 # ==========================================
 def train_model():
     print("🧠 Initializing AI Water Model...")
@@ -24,14 +24,15 @@ def train_model():
     # STEP A: Try to load YOUR Atal Jal CSV
     # We look for columns like: 'Rainfall', 'Soil_Moisture', 'Temp', 'GW_Level'
     try:
+        # Check if file exists to avoid crashing
+        if not os.path.exists('data/district.csv'):
+            raise Exception("CSV file not found")
+
         df = pd.read_csv('data/district.csv')
-        
-        # CLEANING: If columns are named differently, rename them here
-        # Example assumption of CSV headers
-        # df.rename(columns={'District Rain': 'rain', 'Ground Water': 'water'}, inplace=True)
         
         # If the CSV is too complex for this demo, we use "Simulated Historical Data"
         # (This guarantees your demo works even if the CSV format is messy)
+        # remove this 'raise' if you actually have clean data
         raise Exception("Switching to Robust Simulation Mode for Hackathon Stability")
 
     except Exception as e:
