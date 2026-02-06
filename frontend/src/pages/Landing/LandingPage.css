@@ -1,0 +1,187 @@
+/* --- GLOBAL LANDING STYLES --- */
+.landing-container {
+    font-family: 'Inter', sans-serif;
+    background: #f8fafc;
+    color: #1e293b;
+    overflow-x: hidden;
+}
+
+/* --- NAV --- */
+.landing-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 800;
+    font-size: 1.4rem;
+    color: #0f172a;
+}
+.logo-icon { color: #059669; }
+
+.nav-links { display: flex; gap: 25px; align-items: center; }
+.nav-links a { text-decoration: none; color: #64748b; font-weight: 500; transition: color 0.2s; }
+.nav-links a:hover { color: #059669; }
+
+.btn-login {
+    background: transparent;
+    border: 2px solid #e2e8f0;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-login:hover { border-color: #059669; color: #059669; }
+
+/* --- HERO --- */
+.hero-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 60px 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+    min-height: 80vh;
+}
+
+.hero-content { max-width: 550px; }
+
+.badge-pill {
+    display: inline-block;
+    background: #ecfdf5;
+    color: #059669;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 3.5rem;
+    line-height: 1.1;
+    font-weight: 900;
+    margin-bottom: 20px;
+    letter-spacing: -1px;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #059669 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-sub {
+    font-size: 1.1rem;
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.hero-buttons { display: flex; gap: 15px; margin-bottom: 40px; }
+
+.btn-primary-lg {
+    background: #059669;
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 10px 15px -3px rgba(5, 150, 105, 0.4);
+    transition: transform 0.2s;
+}
+.btn-primary-lg:hover { transform: translateY(-3px); background: #047857; }
+
+.btn-secondary-lg {
+    background: white;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Trust Badges */
+.trust-row { display: flex; align-items: center; gap: 15px; color: #94a3b8; font-size: 0.9rem; }
+.partner-logo { font-weight: 800; color: #cbd5e1; font-size: 1.1rem; }
+
+/* --- HERO VISUAL (CSS ART) --- */
+.hero-visual { position: relative; width: 400px; height: 400px; display: flex; align-items: center; justify-content: center; }
+
+.circle-bg {
+    position: absolute;
+    width: 350px; height: 350px;
+    background: linear-gradient(135deg, #d1fae5 0%, #e0f2fe 100%);
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.floating-card {
+    position: absolute;
+    background: white;
+    padding: 15px;
+    border-radius: 16px;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 2;
+    min-width: 180px;
+    animation: float 4s ease-in-out infinite;
+}
+
+.c1 { top: 50px; left: -20px; animation-delay: 0s; }
+.c2 { bottom: 60px; right: -10px; animation-delay: 2s; }
+
+.floating-card .icon {
+    background: #f1f5f9;
+    padding: 10px;
+    border-radius: 10px;
+    color: #059669;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+    100% { transform: translateY(0px); }
+}
+
+/* --- FEATURES --- */
+.features-section { padding: 80px 20px; background: white; text-align: center; }
+.features-section h2 { font-size: 2rem; margin-bottom: 50px; }
+
+.feature-grid {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+}
+
+.feature-card {
+    flex: 1;
+    min-width: 250px;
+    padding: 30px;
+    background: #f8fafc;
+    border-radius: 16px;
+    text-align: left;
+    transition: transform 0.2s;
+}
+.feature-card:hover { transform: translateY(-5px); }
+
+.f-icon { font-size: 2.5rem; color: #059669; margin-bottom: 20px; display: block; }
+.feature-card h3 { margin: 0 0 10px 0; font-size: 1.25rem; }
+.feature-card p { color: #64748b; line-height: 1.6; }

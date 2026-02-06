@@ -1,33 +1,65 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet, Navigate } from 'react-router-dom';
+import { LanguageProvider } from './context/LanguageContext';
 
-// Layouts
-import Sidebar from './components/layout/Sidebar';
-import Header from './components/layout/Header';
+// --- COMPONENTS (Double-check these match your folders from the screenshot) ---
+import Sidebar from './components/layout/Sidebar.jsx'; 
+import Header from './components/layout/Header.jsx';
+// If Footer doesn't exist, comment this out:
+// import Footer from './components/layout/Footer.jsx'; 
 
-// Pages
-import Dashboard from './pages/Dashboard/Dashboard';
-import CropPlanner from './pages/Planner/CropPlanner';
+// --- PAGES ---
+import LandingPage from './pages/Landing/LandingPage.jsx';
+import Dashboard from './pages/Dashboard/Dashboard.jsx';
+import CropPlanner from './pages/Planner/CropPlanner.jsx';
+import ProfitCalc from './pages/Profit/ProfitCalc.jsx'; 
 
-// Styles
-import './styles/variables.css';
-import './styles/global.css';
+// Global CSS
+import './App.css'; 
+
+// --- LAYOUT WRAPPER ---
+// This keeps the Sidebar visible on all App pages
+const AppLayout = () => {
+  return (
+    <div className="app-container">
+      <Sidebar />
+      <div className="main-content">
+        <Header />
+        <div className="content-scrollable">
+          <Outlet />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const App = () => {
   return (
-    <Router>
-      <div className="layout-root">
-        <Sidebar />
-        <div className="layout-body">
-          <Header />
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/planner" element={<CropPlanner />} />
-            <Route path="/profit" element={<div className="page-content"><h1>Profit Module Coming Soon</h1></div>} />
-          </Routes>
-        </div>
-      </div>
-    </Router>
+    <LanguageProvider>
+      <Router>
+        <Routes>
+          
+          {/* 1. PUBLIC LANDING PAGE */}
+          <Route path="/" element={<LandingPage />} />
+
+          {/* 2. THE APP (Dashboard, Planner, etc.) */}
+          <Route path="/app" element={<AppLayout />}>
+            <Route index element={<Dashboard />} />      {/* /app */}
+            <Route path="planner" element={<CropPlanner />} /> {/* /app/planner */}
+            <Route path="profit" element={<ProfitCalc />} />   {/* /app/profit */}
+          </Route>
+
+          {/* 3. REDIRECTS (Fixes your blank screen issue) */}
+          {/* If you go to /planner, it pushes you to /app/planner */}
+          <Route path="/planner" element={<Navigate to="/app/planner" replace />} />
+          <Route path="/dashboard" element={<Navigate to="/app" replace />} />
+          
+          {/* 4. CATCH ALL (404) - Redirects to Landing */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+
+        </Routes>
+      </Router>
+    </LanguageProvider>
   );
 };
 

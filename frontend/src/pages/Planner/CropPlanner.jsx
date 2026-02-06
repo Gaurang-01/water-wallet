@@ -47,6 +47,18 @@ const SearchableDropdown = ({ label, value, onChange, options }) => {
   );
 };
 
+// --- HELPER FOR PROGRESS BAR ---
+const getBarWidth = (available, needed) => {
+    const total = Math.max(available, needed); // Base strictly on the larger value
+    if (total === 0) return 0;
+    // We want the bar to show how much "Available" fills up the "Needed" capacity or vice versa
+    // But for a simple tank logic: 
+    // If Available > Needed, bar is full (100%).
+    // If Available < Needed, bar shows percentage.
+    if (available >= needed) return 100;
+    return (available / needed) * 100;
+};
+
 // --- MAIN COMPONENT ---
 const CropPlanner = () => {
   // 1. STATE
@@ -70,8 +82,8 @@ const CropPlanner = () => {
       analyzing: "Analyzing Aquifer...",
       status_pass: "Solvency Approved",
       status_fail: "High Risk",
-      aquifer: "Aquifer Level",
-      demand: "Crop Demand",
+      aquifer: "Available",
+      demand: "Needed",
       balance: "Water Balance",
       revenue: "Est. Revenue",
       suggestions: "Smart Alternatives",
@@ -92,8 +104,8 @@ const CropPlanner = () => {
       analyzing: "गणना जारी है...",
       status_pass: "स्वीकृत (Approved)",
       status_fail: "जोखिम (High Risk)",
-      aquifer: "उपलब्ध भूजल",
-      demand: "फसल की मांग",
+      aquifer: "उपलब्ध जल",
+      demand: "आवश्यक जल",
       balance: "जल शेष (Balance)",
       revenue: "अनुमानित आय",
       suggestions: "बेहतर विकल्प (Suggestions)",
@@ -135,7 +147,6 @@ const CropPlanner = () => {
         <button 
           className="lang-btn" 
           onClick={() => setLang(lang === 'hi' ? 'en' : 'hi')}
-          style={{ padding:'8px 16px', borderRadius:'20px', border:'1px solid #166534', cursor:'pointer', background:'white', fontWeight:'bold'}}
         >
           {t.btn_lang}
         </button>
@@ -169,7 +180,7 @@ const CropPlanner = () => {
         {/* RESULTS AREA */}
         {result && (
           <div className="result-area">
-            {/* STATUS CARD */}
+            {/* 1. MAIN STATUS CARD */}
             <div className={`alert-card ${result.status === 'PASS' ? 'safe' : 'danger'}`}>
               <div className="alert-header">
                 <span className="icon-lg">{result.status === 'PASS' ? '✅' : '🚫'}</span>
@@ -179,36 +190,39 @@ const CropPlanner = () => {
                 </div>
               </div>
 
-              <div className="water-math">
-                <div className="math-row green">
-                   <span>💧 {t.aquifer}</span> <strong>{result.water_math.available} mm</strong>
-                </div>
-                <div className="math-row red">
-                   <span>📉 {t.demand}</span> <strong>- {result.water_math.needed} mm</strong>
-                </div>
-                <hr className="divider"/>
-                <div className="math-row total">
-                   <span>{t.balance}</span> 
-                   <span>{result.water_math.balance} mm</span>
-                </div>
-              </div>
-
-              {result.status === 'PASS' && (
-                  <div className="profit-box">
-                      <span>{t.revenue}:</span>
-                      <strong>₹ {result.outcome.profit.toLocaleString()}</strong>
+              {/* NEW VISUAL WATER METER */}
+              <div style={{ marginTop: '20px' }}>
+                  <div className="water-stats-row">
+                      <span>{t.aquifer}: {result.water_math.available}mm</span>
+                      <span>{t.demand}: {result.water_math.needed}mm</span>
                   </div>
-              )}
+                  
+                  {/* The Bar */}
+                  <div className="water-visual-bar">
+                      <div 
+                        className="water-fill" 
+                        style={{ 
+                            width: `${getBarWidth(result.water_math.available, result.water_math.needed)}%`,
+                            backgroundColor: result.status === 'PASS' ? '#ffffff' : '#fca5a5' // Turn reddish if fail
+                        }}
+                      ></div>
+                  </div>
+                  
+                  <div style={{ textAlign: 'right', fontSize: '0.85rem', opacity: 0.9, marginTop: '5px' }}>
+                      {t.balance}: <strong>{result.water_math.balance > 0 ? '+' : ''}{result.water_math.balance} mm</strong>
+                  </div>
+              </div>
             </div>
 
-            {/* SMART SUGGESTIONS */}
+            {/* 2. SMART SUGGESTIONS */}
             {result.outcome.suggestions.length > 0 && (
                 <div className="smart-swap">
                     <h3>💡 {result.status === 'PASS' ? t.maximize : t.best_alt}</h3>
                     
                     {result.outcome.suggestions.map((s, i) => (
                         <div key={i} className="swap-card">
-                            <div className={`swap-badge ${s.tag.includes('Wait') ? 'wait' : 'now'}`}>
+                            {/* Smart Badge Logic */}
+                            <div className={`swap-badge ${s.tag.includes('Wait') ? 'wait' : s.tag.includes('Profit') ? 'money' : 'now'}`}>
                                 {s.tag}
                             </div>
                             
@@ -219,17 +233,17 @@ const CropPlanner = () => {
 
                             <div className="swap-meta">
                                 <span>⏱️ {s.duration}</span>
-                                <span>🗓️ {t.sow}: {s.sowing_window}</span>
+                                <span>🗓️ {s.sowing_window}</span>
                             </div>
 
                             <div className="swap-metrics">
                                 <div className="metric">
-                                    <span className="label">Profit (₹)</span>
+                                    <span className="label">Est. Profit</span>
                                     <span className="value">₹{s.profit.toLocaleString()}</span>
                                 </div>
                                 <div className="metric ppd">
                                     <span className="label">{t.profit_drop}</span>
-                                    <span className="value">₹{s.ppd}/mm</span>
+                                    <span className="value">₹{s.ppd}</span>
                                 </div>
                             </div>
                         </div>

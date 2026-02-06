@@ -1,242 +1,240 @@
+/* --- GLOBAL VARIABLES --- */
 :root {
-  --primary: #2e7d32;
-  --bg-card: #ffffff;
-  --border: #e2e8f0;
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --danger-bg: #fef2f2;
-  --danger-border: #fecaca;
-  --safe-bg: #f0fdf4;
-  --safe-border: #bbf7d0;
+    --primary: #059669; /* Emerald 600 */
+    --primary-dark: #047857;
+    --accent: #3b82f6; /* Blue 500 */
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --bg-soft: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
-/* Page Layout */
+body {
+    background-color: var(--bg-soft);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--text-main);
+}
+
 .planner-page {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
+/* --- HEADER --- */
 .header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
-}
-.header-row h1 { font-size: 1.5rem; margin: 0; color: var(--primary); }
-.header-row p { margin: 5px 0 0; color: var(--text-secondary); }
-
-.lang-btn {
-  background: white; border: 1px solid var(--primary);
-  padding: 8px 16px; border-radius: 20px; cursor: pointer;
-}
-
-/* Responsive Grid */
-.planner-container {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 30px;
-}
-
-@media (min-width: 768px) {
-  .planner-container {
-    grid-template-columns: 1fr 1.5fr; /* Split on Desktop */
-    align-items: start;
-  }
-}
-
-/* Input Card */
-.input-card {
-  background: var(--bg-card);
-  padding: 25px;
-  border-radius: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  border: 1px solid var(--border);
-}
-
-.gps-btn {
-  width: 100%; padding: 12px;
-  background: #eff6ff; color: #1d4ed8;
-  border: 1px dashed #bfdbfe; border-radius: 8px;
-  font-weight: 600; cursor: pointer;
-}
-
-.or-divider { text-align: center; color: #94a3b8; margin: 15px 0; font-size: 0.9rem; }
-
-.form-group label {
-  display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-primary);
-}
-.form-group input {
-  width: 100%; padding: 12px; border: 1px solid var(--border);
-  border-radius: 8px; font-size: 1rem; box-sizing: border-box; /* Fixes width issues */
-}
-
-/* --- NEW SEARCHABLE DROPDOWN STYLES --- */
-.searchable-dropdown {
-  position: relative; /* Crucial for floating list */
-  margin-bottom: 20px;
-}
-
-.searchable-dropdown label {
-  display: block; font-weight: 600; margin-bottom: 8px; color: var(--text-primary);
-}
-
-.dropdown-input {
-  width: 100%; padding: 12px; border: 1px solid var(--border);
-  border-radius: 8px; font-size: 1rem;
-  background: #fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>') no-repeat right 12px center;
-  cursor: pointer;
-  box-sizing: border-box;
-}
-
-.dropdown-list {
-  position: absolute;
-  top: 100%; left: 0; right: 0;
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  margin-top: 5px;
-  max-height: 200px; /* Limits height so it scrolls */
-  overflow-y: auto;
-  z-index: 100; /* Floats above everything */
-  list-style: none;
-  padding: 0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-.dropdown-list li {
-  padding: 12px;
-  cursor: pointer;
-  border-bottom: 1px solid #f1f5f9;
-}
-.dropdown-list li:hover { background: #f8fafc; color: var(--primary); }
-
-/* Buttons */
-.btn-primary {
-  width: 100%; padding: 14px; margin-top: 20px;
-  background: var(--primary); color: white;
-  border: none; border-radius: 8px; font-size: 1.1rem;
-  cursor: pointer; transition: background 0.2s;
-}
-.btn-primary:hover { background: #15803d; }
-.btn-primary:disabled { background: #94a3b8; }
-
-/* Results */
-.alert-card {
-  padding: 24px; border-radius: 16px; border: 1px solid transparent;
-}
-.alert-card.safe { background: var(--safe-bg); border-color: var(--safe-border); }
-.alert-card.danger { background: var(--danger-bg); border-color: var(--danger-border); }
-
-.alert-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
-.alert-header h2 { margin: 0; font-size: 1.2rem; }
-.icon-lg { font-size: 1.5rem; }
-
-.water-math {
-  background: rgba(255,255,255,0.7);
-  padding: 15px; border-radius: 12px;
-}
-.math-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
-.math-row.green { color: #166534; font-weight: 600; }
-.math-row.red { color: #b91c1c; font-weight: 600; }
-.math-row.total { margin-top: 10px; font-weight: 800; font-size: 1.1rem; }
-.divider { border: 0; border-top: 1px dashed #cbd5e1; }
-
-.sowing-box {
-  background: #eff6ff; border: 1px solid #dbeafe;
-  padding: 15px; border-radius: 8px; margin-top: 15px;
-}
-.fail-reason { color: #b91c1c; margin-top: 15px; font-weight: 500; }
-
-/* Swap Cards */
-.smart-swap { margin-top: 25px; }
-.smart-swap h3 { color: #b45309; font-size: 1rem; margin-bottom: 15px; }
-
-.swap-card {
-  background: white; border: 1px solid var(--border);
-  padding: 15px; border-radius: 10px;
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 10px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-.swap-card h4 { margin: 0 0 5px 0; }
-.small-text { font-size: 0.85rem; color: var(--text-secondary); margin: 0; }
-.swap-profit { display: flex; flex-direction: column; text-align: right; }
-.swap-profit strong { color: #166534; }
-/* ... Keep your existing basic layout CSS ... */
-
-.reason-text {
-    margin: 5px 0 0;
-    font-size: 0.95rem;
-    color: #475569;
-}
-
-.profit-box {
-    margin-top: 15px;
-    background: #ffffff;
-    padding: 12px;
-    border-radius: 8px;
     display: flex;
     justify-content: space-between;
-    font-size: 1.1rem;
-    color: #166534;
-    border: 1px solid #bbf7d0;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #e2e8f0;
 }
 
-/* SMART SWAP CARDS */
-.smart-swap { margin-top: 30px; }
-.smart-swap h3 { 
-    color: #b45309; 
-    font-size: 1.1rem; 
-    margin-bottom: 15px; 
-    display: flex; 
-    align-items: center; 
-    gap: 8px;
+.header-row h1 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary-dark);
+    margin: 0;
+}
+
+.header-row p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin: 4px 0 0 0;
+}
+
+.lang-btn {
+    background: white;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    font-weight: 700;
+    border-radius: 50px;
+    padding: 6px 16px;
+    transition: all 0.2s ease;
+}
+
+.lang-btn:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* --- INPUT CARD (Glassmorphism) --- */
+.input-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(255,255,255,0.5);
+    margin-bottom: 25px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+input, .dropdown-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: border-color 0.2s;
+    background: #f8fafc;
+    box-sizing: border-box; /* Fixes padding issues */
+}
+
+input:focus, .dropdown-input:focus {
+    border-color: var(--primary);
+    background: white;
+    outline: none;
+}
+
+/* --- BUTTONS --- */
+.btn-primary {
+    width: 100%;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(5, 150, 105, 0.5);
+}
+
+.btn-primary:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* --- RESULT AREA (Animations) --- */
+.result-area {
+    animation: slideUp 0.5s ease-out forwards;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- STATUS CARD --- */
+.alert-card {
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 25px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.alert-card.safe {
+    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+}
+
+.alert-card.danger {
+    background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%);
+}
+
+.alert-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 2;
+}
+
+.icon-lg {
+    font-size: 2.5rem;
+    background: rgba(255,255,255,0.2);
+    border-radius: 12px;
+    padding: 5px;
+}
+
+.reason-text {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin: 5px 0 0 0;
+}
+
+/* --- VISUAL WATER BAR --- */
+.water-visual-bar {
+    background: rgba(0,0,0,0.2);
+    height: 12px;
+    border-radius: 6px;
+    margin: 15px 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.water-fill {
+    height: 100%;
+    background: #ffffff;
+    border-radius: 6px;
+    transition: width 1s ease-out;
+}
+
+.water-stats-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+/* --- SUGGESTION CARDS --- */
+.smart-swap h3 {
+    font-size: 1.1rem;
+    color: var(--text-main);
+    margin-bottom: 15px;
+    border-left: 4px solid var(--accent);
+    padding-left: 10px;
 }
 
 .swap-card {
     background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 16px;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
+    border: 1px solid #f1f5f9;
+    box-shadow: var(--shadow-sm);
     position: relative;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-    transition: transform 0.2s;
-}
-.swap-card:hover { transform: translateY(-2px); border-color: #cbd5e1; }
-
-.swap-badge {
-    position: absolute;
-    top: -10px; right: 15px;
-    background: #2563eb;
-    color: white;
-    font-size: 0.75rem;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-weight: 600;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
 }
 
-.swap-details h4 { margin: 0; font-size: 1.1rem; color: #1e293b; }
-.swap-details p { margin: 4px 0 0; font-size: 0.9rem; color: #64748b; }
-
-.swap-metrics {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 15px;
-    padding-top: 10px;
-    border-top: 1px dashed #e2e8f0;
+.swap-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--accent);
 }
 
-.metric { display: flex; flex-direction: column; }
-.metric.ppd { text-align: right; }
-
-.metric .label { font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px; }
-.metric .value { font-weight: 700; color: #334155; font-size: 1rem; }
-.metric.ppd .value { color: #2563eb; } /* Blue for Profit Per Drop */
-/* ... Previous CSS ... */
-
-/* New Header Layout inside Swap Card */
 .swap-header {
     display: flex;
     justify-content: space-between;
@@ -244,37 +242,72 @@
     margin-bottom: 8px;
 }
 
-.type-pill {
-    font-size: 0.7rem;
-    background: #f1f5f9;
-    color: #64748b;
-    padding: 2px 8px;
-    border-radius: 4px;
-    text-transform: uppercase;
-    font-weight: 600;
+.swap-header h4 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--text-main);
 }
 
-/* Metadata (Duration & Sowing) */
+.type-pill {
+    font-size: 0.65rem;
+    background: #f1f5f9;
+    color: var(--text-muted);
+    padding: 3px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
 .swap-meta {
     display: flex;
     gap: 15px;
-    font-size: 0.85rem;
-    color: #475569;
+    font-size: 0.8rem;
+    color: var(--text-muted);
     margin-bottom: 12px;
 }
 
-/* Badge Variations */
+.swap-metrics {
+    display: flex;
+    justify-content: space-between;
+    background: #f8fafc;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.metric {
+    display: flex;
+    flex-direction: column;
+}
+
+.metric .label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.metric .value {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.metric.ppd .value {
+    color: var(--accent);
+}
+
+/* Badges */
 .swap-badge {
     position: absolute;
-    top: -10px; right: 15px;
-    font-size: 0.75rem;
-    padding: 4px 12px;
+    top: -10px;
+    right: 15px;
+    font-size: 0.7rem;
+    padding: 4px 10px;
     border-radius: 20px;
     font-weight: 700;
+    text-transform: uppercase;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-.swap-badge.now { background: #16a34a; color: white; } /* Green */
-.swap-badge.wait { background: #ea580c; color: white; } /* Orange */
-
-/* Make sure the profit metric pops */
-.metric.ppd .value { color: #2563eb; }
+.swap-badge.now { background: #10b981; color: white; }
+.swap-badge.wait { background: #f59e0b; color: white; }
+.swap-badge.money { background: #3b82f6; color: white; }

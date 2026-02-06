@@ -7,112 +7,108 @@ const Dashboard = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
 
-  // Mock function for the "Listen" button
   const playAudio = () => {
-    alert("🔊 Audio Advisory: Water levels are critical. Please conserve water.");
+    alert("🔊 Advisory: Water levels are very low (15%). Do not sow Sugarcane.");
   };
 
   return (
-    <div className="page-content kisan-dashboard">
+    <div className="page-content dashboard-grid">
       
-      {/* 1. WELCOME BANNER */}
-      <div className="welcome-banner">
-        <div className="user-profile">
-          <div className="avatar">R</div>
-          <div>
-            <h2>{t.greeting}, Ramesh!</h2>
-            {/* Dynamic Status Badge */}
-            <div className="status-badge danger">
-              <span className="material-icons icon-sm">warning</span>
-              {t.status_bad}
-            </div>
-          </div>
+      {/* --- LEFT: TANK (HERO) --- */}
+      <div className="col-left">
+        <div className="welcome-section">
+            <h1>{t.greeting || "Namaste"}, Ramesh!</h1>
+            <p className="subtitle">Farm ID: <strong>MH-PN-99</strong></p>
         </div>
-        <button className="btn-audio" onClick={playAudio}>
-           <span className="material-icons">volume_up</span> 
-           {t.listen_btn}
-        </button>
-      </div>
 
-      {/* 2. VISUAL WATER TANK (The Core Feature) */}
-      <div className="tank-card danger-theme">
-        <div className="card-header">
-          <h3>{t.tank_title}</h3>
-          <span className="material-icons info-icon">help_outline</span>
-        </div>
-        
-        <div className="tank-visual-container">
-          {/* The Tank Graphic */}
-          <div className="tank-body">
-            <div className="water-level" style={{ height: '35%' }}></div>
-            <div className="level-indicator">35%</div>
-            <div className="measurement-lines">
-              <span></span><span></span><span></span>
-            </div>
+        <div className="tank-card danger-theme">
+          <div className="card-header">
+            <h3>{t.tank_title || "Aquifer Level"}</h3>
+            <button className="btn-audio-icon" onClick={playAudio}>
+                <span className="material-icons">volume_up</span>
+            </button>
           </div>
           
-          {/* Text Status */}
-          <div className="tank-status">
-            <h1 className="status-text">{t.tank_status_low}</h1>
-            <p className="status-desc">
-              {t.tank_desc_1} <strong className="red-text">15%</strong> {t.tank_desc_2}
-            </p>
-            
-            <div className="advisory-box">
-              <span className="material-icons">tips_and_updates</span>
-              <div>
-                <strong>{t.advisory_label}</strong>
-                <p>{t.advisory_text}</p>
+          <div className="tank-visual-container">
+            {/* Animated Tank */}
+            <div className="tank-body">
+              <div className="water-level danger-anim" style={{ height: '28%' }}>
+                <div className="wave"></div>
               </div>
+              <div className="level-indicator">28%</div>
+              <div className="measurement-lines">
+                <span></span><span></span><span></span><span></span>
+              </div>
+            </div>
+            
+            <div className="tank-status">
+              <h1 className="status-text warning">{t.tank_status_low || "CRITICAL"}</h1>
+              <p className="status-desc">
+                {t.tank_desc_1 || "Depth:"} <strong className="red-text">140ft</strong>. 
+                {t.tank_desc_2 || "Depleting fast."}
+              </p>
+              
+              <button className="btn-action primary" onClick={() => navigate('/planner')}>
+                <span className="material-icons">grass</span>
+                {t.btn_crop_check || "Check Crop Plan"}
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 3. WEATHER GRID */}
-      <div className="section-title">
-        <h3>{t.weather_title}</h3>
-      </div>
-      
-      <div className="weather-grid">
-        {/* Today */}
-        <div className="weather-item today">
-          <span className="day-label">{t.today}</span>
-          <span className="material-icons icon-sun">wb_sunny</span>
-          <div className="weather-info">
-            <strong>34°C</strong>
-            <span>{t.clear}</span>
-          </div>
-        </div>
+      {/* --- RIGHT: WEATHER & STATS (No Libraries) --- */}
+      <div className="col-right">
         
-        {/* Forecast (Alert) */}
-        <div className="weather-item warning">
-          <div className="alert-tag">{t.wait_tag}</div>
-          <span className="day-label">{t.wed}</span>
-          <span className="material-icons icon-rain">thunderstorm</span>
-          <div className="weather-info">
-            <strong>{t.heavy_rain}</strong>
-            <span>90% Chance</span>
-          </div>
+        {/* FAKE CHART (SVG Drawing) */}
+        <div className="chart-card">
+            <div className="card-header-small">
+                <h4>Groundwater Trend (6 Months)</h4>
+            </div>
+            <div className="static-chart-container">
+                {/* This is just a drawing, no library needed */}
+                <svg viewBox="0 0 300 100" className="fake-chart-svg">
+                    <defs>
+                        <linearGradient id="grad" x1="0" x2="0" y1="0" y2="1">
+                            <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.3"/>
+                            <stop offset="100%" stopColor="#3b82f6" stopOpacity="0"/>
+                        </linearGradient>
+                    </defs>
+                    <path fill="url(#grad)" stroke="#3b82f6" strokeWidth="3" 
+                        d="M0,80 Q50,70 100,40 T200,50 T300,20 V100 H0 Z" />
+                </svg>
+                <div className="chart-labels">
+                    <span>Jan</span><span>Mar</span><span>May</span><span>Jul</span>
+                </div>
+            </div>
         </div>
-      </div>
 
-      {/* 4. ACTION BUTTONS */}
-      <div className="action-grid">
-        {/* Link to Crop Planner */}
-        <button className="btn-action primary" onClick={() => navigate('/planner')}>
-          <div className="icon-circle">
-            <span className="material-icons">grass</span>
-          </div>
-          <span>{t.btn_crop_check}</span>
-        </button>
-        
-        <button className="btn-action secondary">
-          <div className="icon-circle">
-            <span className="material-icons">call</span>
-          </div>
-          <span>{t.btn_call_help}</span>
-        </button>
+        {/* Weather Grid */}
+        <div className="weather-grid-compact">
+            <div className="weather-tile">
+                <span className="label">Today</span>
+                <span className="material-icons sun">wb_sunny</span>
+                <strong>38°C</strong>
+            </div>
+            <div className="weather-tile warning">
+                <span className="label">Wed</span>
+                <span className="material-icons rain">thunderstorm</span>
+                <strong>Heavy Rain</strong>
+            </div>
+            <div className="weather-tile">
+                <span className="label">Soil</span>
+                <span className="material-icons soil">grain</span>
+                <strong>Dry (0.2)</strong>
+            </div>
+        </div>
+
+        {/* Secondary Action */}
+        <div className="quick-actions">
+            <button className="btn-outline" onClick={() => navigate('/profit')}>
+                <span className="material-icons">currency_rupee</span>
+                {t.menu_profit || "Profit Calc"}
+            </button>
+        </div>
       </div>
     </div>
   );

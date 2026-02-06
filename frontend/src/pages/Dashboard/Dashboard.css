@@ -1,278 +1,197 @@
-/* --- Banner --- */
-.welcome-banner {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: white;
-  padding: 20px;
-  border-radius: 16px;
-  box-shadow: var(--shadow);
-  margin-bottom: 25px;
-  border: 1px solid var(--border);
+/* --- GRID LAYOUT --- */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr; /* Left side slightly bigger */
+    gap: 25px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.user-profile {
-  display: flex;
-  gap: 15px;
-  align-items: center;
+@media (max-width: 768px) {
+    .dashboard-grid { grid-template-columns: 1fr; }
 }
 
-.avatar {
-  width: 55px;
-  height: 55px;
-  background: var(--bg-main);
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-weight: 700;
-  font-size: 1.4rem;
-  color: var(--water-accent);
-  border: 2px solid var(--water-accent);
-}
+/* --- TEXT & HEADERS --- */
+.welcome-section { margin-bottom: 20px; }
+.welcome-section h1 { font-size: 1.8rem; color: var(--text-main); margin: 0; }
+.subtitle { color: var(--text-muted); margin: 5px 0 0 0; }
 
-.welcome-banner h2 {
-  font-weight: 700;
-  font-size: 1.4rem;
-  margin-bottom: 4px;
-  color: var(--text-primary);
-}
-
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-.status-badge.danger {
-  background: var(--danger-bg);
-  color: var(--danger);
-}
-.icon-sm { font-size: 1rem; }
-
-.btn-audio {
-  background: var(--water-bg);
-  color: var(--water-accent);
-  border: none;
-  border-radius: 50px;
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.1s;
-}
-.btn-audio:active { transform: scale(0.95); }
-
-/* --- Tank Card --- */
+/* --- TANK CARD IMPROVED --- */
 .tank-card {
-  background: white;
-  padding: 24px;
-  border-radius: 20px;
-  box-shadow: var(--shadow);
-  margin-bottom: 30px;
-  border: 1px solid var(--border);
-  position: relative;
-  overflow: hidden;
-}
-
-.tank-card.danger-theme { border-top: 6px solid var(--danger); }
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 25px;
-  color: var(--text-secondary);
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid #e2e8f0;
+    height: 100%; /* Fill column */
 }
 
 .tank-visual-container {
-  display: flex;
-  gap: 30px;
-  align-items: flex-start;
+    display: flex;
+    gap: 25px;
+    align-items: center;
+    margin-top: 20px;
 }
 
-/* The Graphic Tank */
+/* The Tank Container */
 .tank-body {
-  width: 100px;
-  height: 150px;
-  border: 4px solid #cbd5e1;
-  border-radius: 0 0 16px 16px;
-  border-top: none;
-  position: relative;
-  background: #f8fafc;
-  overflow: hidden;
-  flex-shrink: 0;
+    width: 120px;
+    height: 200px;
+    border: 3px solid #94a3b8;
+    border-top: none;
+    border-radius: 0 0 16px 16px;
+    position: relative;
+    background: #f1f5f9;
+    overflow: hidden;
+    flex-shrink: 0;
 }
 
+/* Water Animation */
 .water-level {
-  background: linear-gradient(to top, var(--danger) 0%, #fb7185 100%);
-  width: 100%;
-  position: absolute;
-  bottom: 0;
-  transition: height 1s ease;
-  opacity: 0.9;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    transition: height 1s ease;
+}
+
+.water-level.danger-anim {
+    background: linear-gradient(to top, #ef4444, #fca5a5);
+    opacity: 0.9;
+}
+
+/* The Wave Effect */
+.wave {
+    position: absolute;
+    top: -10px;
+    left: 0;
+    width: 200%;
+    height: 20px;
+    background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 350 32" xmlns="http://www.w3.org/2000/svg"><path d="M0 16c26.667 0 53.333 10.667 80 10.667s53.333-10.667 80-10.667c26.667 0 53.333 10.667 80 10.667s53.333-10.667 80-10.667v16h-320z" fill="rgba(239,68,68,0.4)"/></svg>');
+    animation: wave-anim 4s linear infinite;
+}
+
+@keyframes wave-anim {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
 }
 
 .level-indicator {
-  position: absolute;
-  width: 100%;
-  text-align: center;
-  bottom: 10px;
-  color: white;
-  font-weight: 700;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-  z-index: 2;
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    bottom: 40%;
+    color: white;
+    font-weight: 800;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    z-index: 5;
 }
 
 .measurement-lines {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  bottom: 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  z-index: 1;
-  opacity: 0.5;
+    position: absolute;
+    right: 8px; top: 10px; bottom: 10px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    z-index: 2; opacity: 0.4;
 }
-.measurement-lines span { width: 10px; height: 2px; background: #94a3b8; display: block; }
+.measurement-lines span { width: 12px; height: 2px; background: #64748b; }
 
-/* Tank Text */
-.tank-status .status-text {
-  color: var(--danger);
-  font-size: 2rem;
-  margin-bottom: 8px;
-  font-weight: 800;
-}
-.status-desc {
-  font-size: 1.05rem;
-  color: var(--text-secondary);
-  margin-bottom: 15px;
-  line-height: 1.4;
-}
-.red-text { color: var(--danger); }
+/* Status Text */
+.status-text.warning { color: #ef4444; margin: 0; font-size: 2rem; font-weight: 800; }
+.status-desc { font-size: 0.95rem; color: #64748b; margin-bottom: 20px; line-height: 1.5; }
+.red-text { color: #ef4444; font-weight: 700; }
 
-.advisory-box {
-  display: flex;
-  gap: 12px;
-  background: var(--warning-bg);
-  border: 1px solid var(--warning-border);
-  padding: 12px;
-  border-radius: 12px;
-  color: #854d0e;
-  align-items: flex-start;
+/* --- RIGHT COLUMN ITEMS --- */
+.chart-card {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 20px;
+    border: 1px solid #f1f5f9;
 }
 
-/* --- Weather --- */
-.section-title h3 {
-  font-size: 1.2rem;
-  color: var(--text-secondary);
-  margin-bottom: 15px;
-  font-weight: 600;
+.card-header-small h4 { margin: 0 0 15px 0; color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; }
+
+/* Weather Tiles */
+.weather-grid-compact {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
-.weather-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-  margin-bottom: 30px;
+.weather-tile {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
 }
 
-.weather-item {
-  background: white;
-  padding: 15px;
-  border-radius: 16px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
-  position: relative;
-}
+.weather-tile.warning { background: #fff7ed; border-color: #fdba74; }
 
-.weather-item.warning {
-  background: #fffbeb;
-  border: 2px solid var(--warning-border);
-}
+.weather-tile .label { font-size: 0.75rem; color: #64748b; margin-bottom: 5px; }
+.weather-tile .material-icons { font-size: 1.8rem; margin-bottom: 5px; }
+.sun { color: #f59e0b; }
+.rain { color: #3b82f6; }
+.soil { color: #8b5cf6; }
 
-.icon-sun { color: #f59e0b; font-size: 2.5rem; }
-.icon-rain { color: var(--water-accent); font-size: 2.5rem; }
-
-.alert-tag {
-  position: absolute;
-  top: -10px;
-  background: var(--danger);
-  color: white;
-  padding: 2px 10px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: bold;
-}
-
-.day-label {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.weather-info { display: flex; flex-direction: column; }
-.weather-info strong { font-size: 1.1rem; color: var(--text-primary); }
-.weather-info span { font-size: 0.85rem; color: var(--text-secondary); }
-
-/* --- Action Buttons --- */
-.action-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-}
-
-.btn-action {
-  border: none;
-  padding: 20px 15px;
-  border-radius: 16px;
-  font-size: 1rem;
-  font-weight: 600;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  box-shadow: var(--shadow);
-  transition: transform 0.1s;
-}
-
-.btn-action:active { transform: scale(0.98); }
-
+/* Buttons */
 .btn-action.primary {
-  background: var(--safe);
-  color: white;
+    width: 100%;
+    background: #059669; /* Emerald */
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-action.primary:hover { background: #047857; transform: translateY(-2px); }
+
+.btn-outline {
+    width: 100%;
+    background: transparent;
+    border: 2px solid #cbd5e1;
+    padding: 12px;
+    border-radius: 10px;
+    color: #475569;
+    font-weight: 600;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    cursor: pointer;
+}
+.btn-outline:hover { border-color: #059669; color: #059669; }
+
+.btn-audio-icon {
+    background: #f1f5f9; border: none; padding: 8px; border-radius: 50%;
+    cursor: pointer; color: #3b82f6;
+}
+/* --- FAKE CHART CSS --- */
+.static-chart-container {
+    height: 150px;
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
 }
 
-.btn-action.primary .icon-circle {
-  background: rgba(255,255,255,0.25);
+.fake-chart-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
 }
 
-.btn-action.secondary {
-  background: white;
-  color: var(--text-primary);
-  border: 1px solid var(--border);
-}
-
-.btn-action.secondary .icon-circle {
-  background: var(--bg-main);
-  color: var(--text-primary);
-}
-
-.icon-circle {
-  width: 45px;
-  height: 45px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
+.chart-labels {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    margin-top: 5px;
+    font-size: 0.75rem;
+    color: #94a3b8;
 }
