@@ -1,0 +1,78 @@
+.app-sidebar {
+  width: 260px;
+  background-color: var(--bg-side);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  height: 100%;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.brand-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--water-accent);
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-weight: bold;
+  box-shadow: 0 0 15px var(--water-glow);
+}
+
+.brand-sub {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+
+.nav-group {
+  flex: 1;
+}
+
+.group-title {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: 8px;
+  margin-bottom: 5px;
+  transition: all 0.2s;
+}
+
+.nav-link:hover, .nav-link.active {
+  background: rgba(14, 165, 233, 0.1);
+  color: #fff;
+}
+
+.nav-link.active .material-icons {
+  color: var(--water-accent);
+}
+
+.sidebar-footer {
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+}
+
+.user-info {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 0.9rem;
+}
+.loc { font-size: 0.75rem; color: var(--text-secondary); }

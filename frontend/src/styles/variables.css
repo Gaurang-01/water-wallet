@@ -1,0 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Material+Icons&display=swap');
+
+:root {
+  /* Core Palette */
+  --bg-main: #0b0e14;
+  --bg-side: #11141d;
+  --card-bg: rgba(255, 255, 255, 0.03);
+  --border: rgba(255, 255, 255, 0.08);
+
+  /* Functional Colors */
+  --water-accent: #0ea5e9;       /* Water Blue */
+  --water-glow: rgba(14, 165, 233, 0.3);
+  --safe: #10b981;               /* Crop Safe */
+  --danger: #ef4444;             /* Crop Insolvent/Drought */
+  --warning: #f59e0b;            /* Stress Watch */
+  
+  /* Typography */
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+}

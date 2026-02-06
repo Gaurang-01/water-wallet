@@ -1,0 +1,34 @@
+.metric-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  padding: 20px;
+  border-radius: 12px;
+  min-width: 200px;
+}
+
+.metric-title {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+
+.metric-val {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+}
+
+.metric-unit {
+  margin-left: 5px;
+  color: var(--text-secondary);
+}
+
+.metric-sub {
+  font-size: 0.8rem;
+  margin-top: 8px;
+  color: var(--text-secondary);
+}
+
+/* Status variants */
+.metric-card.danger .metric-val { color: var(--danger); }
+.metric-card.safe .metric-val { color: var(--safe); }
