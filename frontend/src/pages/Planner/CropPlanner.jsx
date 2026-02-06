@@ -108,20 +108,28 @@ const CropPlanner = () => {
   const runAnalysis = async () => {
     setLoading(true);
 
-    const res = await fetch('http://localhost:5000/api/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        village,
-        crop,
-        area,
-        ...(coords || {})   // send lat/lon if available
-      })
-    });
+    try {
+      const res = await fetch('http://localhost:5000/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          village,
+          crop: crop.toLowerCase(),
+          area,
+          district: village.toLowerCase(),
+          ...(coords || {})
+        })
+      });
 
-    const data = await res.json();
-    setResult(data);
-    setLoading(false);
+      const data = await res.json();
+      console.log("API Response:", data);
+      setResult(data);
+    } catch (error) {
+      console.error("API Error:", error);
+      alert("Error connecting to server!");
+    } finally {
+      setLoading(false);
+    }
   };
 
 
@@ -172,24 +180,26 @@ const CropPlanner = () => {
 
             <div className={`alert ${result.status === "PASS" ? "safe" : "danger"}`}>
 
-              <h3>{result.outcome.message}</h3>
-
-              {/* ALWAYS SHOW REASON */}
-              <p><b>{t.reason}:</b> {result.outcome.reason}</p>
+              <h3>{result.crop_outcome?.message || "Analysis Complete"}</h3>
 
               <p>
-                Available: {result.water_math.available}mm |
-                Needed: {result.water_math.needed}mm
+                💧 Available: {result.water_analysis?.available_mm || 0}mm | 
+                Needed: {result.water_analysis?.needed_mm || 0}mm | 
+                Balance: {result.water_analysis?.balance_mm || 0}mm
               </p>
+              
+              <p>📊 Profit Per Drop: ₹{result.crop_outcome?.expected_profit && result.water_analysis?.needed_mm 
+                ? Math.round(result.crop_outcome.expected_profit / result.water_analysis.needed_mm)
+                : 0}/mm</p>
             </div>
 
 
             {/* ================= SUGGESTIONS ================= */}
-            {result.outcome.suggestions.length > 0 && (
+            {result.recommendations && result.recommendations.length > 0 && (
               <>
                 <h3 className="suggest-title">💡 {t.alternatives}</h3>
 
-                {result.outcome.suggestions.map((s, i) => (
+                {result.recommendations.sort((a, b) => b.profit - a.profit).map((s, i) => (
                   <div key={i} className="suggest-card">
 
                     <h4>
@@ -198,12 +208,16 @@ const CropPlanner = () => {
 
                     <div className="meta">
                       ⏱ {lang === 'hi'
-                        ? `${s.duration.split(" ")[0]} दिन ${t.cultivate}`
+                        ? `${s.duration} ${t.cultivate}`
                         : `${s.duration} ${t.cultivate}`}
                     </div>
 
                     <div className="meta">
                       💰 ₹{s.profit.toLocaleString()}
+                    </div>
+                    
+                    <div className="meta">
+                      💧 PPD: ₹{s.ppd ? s.ppd.toLocaleString() : 0}/mm
                     </div>
 
                     <div className="tag">

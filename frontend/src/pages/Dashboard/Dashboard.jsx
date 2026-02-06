@@ -7,18 +7,29 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { lang } = useLanguage();
 
+  /* ⭐ get user data saved from login page */
+  const name = localStorage.getItem('farmerName') || 'Farmer';
+  const village = localStorage.getItem('farmerVillage') || 'Your Village';
+
+  /* demo values (later connect to backend) */
   const waterPercent = 28;
   const waterMM = 1027;
+  const bestCrop = "Wheat";
+  const profit = 42000;
 
   return (
     <div className="dashboard-clean">
 
-      {/* ===== LEFT — HERO TANK ===== */}
+      {/* ================= LEFT — HERO WATER TANK ================= */}
       <div className="tank-card-clean">
 
         <h1 className="welcome">
-          {lang === 'hi' ? 'नमस्ते' : 'Namaste'}, Ramesh 👋
+          {lang === 'hi' ? 'नमस्ते' : 'Namaste'}, {name} 👋
         </h1>
+
+        <p className="village-label">
+          📍 {village}
+        </p>
 
         <div className="tank-big">
 
@@ -40,30 +51,39 @@ const Dashboard = () => {
       </div>
 
 
-      {/* ===== RIGHT — SIMPLE INFO ===== */}
+      {/* ================= RIGHT — INFO PANEL ================= */}
       <div className="info-panel">
 
         <div className="info-box">
-          <span>💧 Water Left</span>
+          <span>
+            {lang === 'hi' ? '💧 पानी बचा' : '💧 Water Left'}
+          </span>
           <h2>{waterMM} mm</h2>
         </div>
 
         <div className="info-box">
-          <span>🌾 Best Crop</span>
-          <h2>Wheat</h2>
+          <span>
+            {lang === 'hi' ? '🌾 सर्वोत्तम फसल' : '🌾 Best Crop'}
+          </span>
+          <h2>{bestCrop}</h2>
         </div>
 
         <div className="info-box">
-          <span>💰 Est Profit</span>
-          <h2>₹42,000</h2>
+          <span>
+            {lang === 'hi' ? '💰 अनुमानित लाभ' : '💰 Est Profit'}
+          </span>
+          <h2>₹{profit.toLocaleString()}</h2>
         </div>
 
         <button
           className="btn-big-primary"
           onClick={() => navigate('/app/planner')}
         >
-          Plan My Crops →
+          {lang === 'hi'
+            ? 'फसल योजना बनाएं →'
+            : 'Plan My Crops →'}
         </button>
+
       </div>
 
     </div>
