@@ -1,37 +1,27 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 import './Header.css';
 
 const Header = () => {
-  const [location, setLocation] = useState("");
-
-  const search = () => {
-    if (!location.trim()) return;
-
-    // store globally for other pages
-    localStorage.setItem("location", location);
-    window.dispatchEvent(new Event("locationChanged"));
-  };
+  const { lang, toggleLanguage, t } = useLanguage();
 
   return (
     <header className="top-header">
       <div className="search-bar">
         <span className="material-icons">location_on</span>
-
-        <input
-          type="text"
-          placeholder="Search Village, District or Block..."
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && search()}
-        />
-
-        <button onClick={search}>Search</button>
+        <input type="text" placeholder={t.search_placeholder} defaultValue="Chaka, Prayagraj (211008)" />
       </div>
 
       <div className="header-right">
+        {/* Toggle Button: Shows what language you CAN switch to */}
+        <button className="lang-toggle" onClick={toggleLanguage}>
+          <span className="material-icons">translate</span>
+          {lang === 'hi' ? 'English' : 'हिंदी'}
+        </button>
+
         <div className="status-pill critical">
           <span className="dot"></span>
-          ZONE: LIVE
+          {t.zone_critical}
         </div>
       </div>
     </header>

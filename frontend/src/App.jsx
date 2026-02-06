@@ -9,7 +9,7 @@ import Header from './components/layout/Header';
 import Dashboard from './pages/Dashboard/Dashboard';
 import CropPlanner from './pages/Planner/CropPlanner';
 
-// Styles (Order matters!)
+// Styles
 import './styles/variables.css';
 import './styles/global.css';
 
@@ -23,7 +23,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/planner" element={<CropPlanner />} />
-            <Route path="/profit" element={<div className="page-content"><h1>Profit Per Drop Module Coming Soon</h1></div>} />
+            <Route path="/profit" element={<div className="page-content"><h1>Profit Module Coming Soon</h1></div>} />
           </Routes>
         </div>
       </div>
