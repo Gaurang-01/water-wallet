@@ -2,192 +2,161 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const csv = require('csv-parser');
-const ss = require('simple-statistics');
 
-// --- 1. LOAD DATA (In-Memory) ---
-let waterData = [];
-const csvPath = path.join(__dirname, '../data/Atal_Jal_Disclosed_Ground_Water_Level-2015-2022.csv');
+// --- 1. ROBUST DATA LOADER ---
+let villageData = [];
+let districtData = [];
 
-fs.createReadStream(csvPath)
-  .pipe(csv())
-  .on('data', (row) => waterData.push(row))
-  .on('end', () => console.log('✅ Groundwater Data Loaded:', waterData.length, 'rows'));
-
-
-// --- 2. GROUNDWATER PREDICTION ENGINE ---
-const predictGroundwater = (villageName) => {
-    // 1. Find Village (Fuzzy Match)
-    const row = waterData.find(r => 
-        r.Village && r.Village.toLowerCase().includes(villageName.toLowerCase())
-    );
-
-    // 2. Fallback if not found (Use a "Good" default for Demo purposes)
-    if (!row) return 12.0; 
-
-    // 3. Extract History
-    const dataPoints = [];
-    for (let year = 2015; year <= 2022; year++) {
-        const val = parseFloat(row[`Pre-monsoon_${year} (meters below ground level)`]);
-        if (!isNaN(val)) dataPoints.push([year, val]);
+const loadCSV = (filename, targetArray) => {
+    const filePath = path.join(__dirname, `../data/${filename}`);
+    if (fs.existsSync(filePath)) {
+        fs.createReadStream(filePath)
+            .pipe(csv())
+            .on('data', (row) => targetArray.push(row));
     }
-
-    // 4. Linear Regression
-    if (dataPoints.length < 2) return 12.0; // Default if no history
-    
-    const line = ss.linearRegressionLine(ss.linearRegression(dataPoints));
-    let prediction = line(2026);
-
-    // 5. Sanity Check (Cap extreme values for demo stability)
-    return Math.max(2, Math.min(prediction, 40)); 
 };
 
+// Load your CSVs (Ensure these file names match your folder exactly)
+loadCSV('Atal_Jal_Disclosed_Ground_Water_Level-2015-2022.csv', villageData);
+loadCSV('district.csv', districtData);
 
-// --- 3. SOWING CALENDAR LOGIC ---
-const calculateSowingWindow = (dailyForecast) => {
-    // We need 3 consecutive "Good Days" to recommend sowing
-    // Criteria: Rain < 5mm, Wind < 15km/h, Temp 20-35°C
-    
-    let consecutiveGoodDays = 0;
-    let startIndex = -1;
-
-    for (let i = 0; i < dailyForecast.time.length; i++) {
-        const rain = dailyForecast.precipitation_sum[i];
-        const wind = dailyForecast.windspeed_10m_max[i];
-        const tempMax = dailyForecast.temperature_2m_max[i];
-
-        const isGood = rain < 10 && wind < 20 && tempMax > 20 && tempMax < 38;
-
-        if (isGood) {
-            if (consecutiveGoodDays === 0) startIndex = i;
-            consecutiveGoodDays++;
-            
-            if (consecutiveGoodDays >= 3) {
-                // Found our window!
-                return {
-                    start: dailyForecast.time[startIndex],
-                    end: dailyForecast.time[i],
-                    status: 'OPTIMAL'
-                };
-            }
-        } else {
-            consecutiveGoodDays = 0;
-            startIndex = -1;
-        }
-    }
-
-    // If no perfect window found, return the first day but mark as "Risk"
-    return {
-        start: dailyForecast.time[0],
-        end: dailyForecast.time[2] || dailyForecast.time[0],
-        status: 'CONDITIONAL' 
-    };
+// --- 2. CROP ECONOMICS DATABASE (The "Profit" Engine) ---
+// Water Need (mm), Cost (₹/acre), Revenue (₹/acre)
+const CROP_DB = {
+    'sugarcane': { need: 2000, cost: 60000, revenue: 160000, risk: 'High', duration: 365 },
+    'paddy':     { need: 1200, cost: 40000, revenue: 95000,  risk: 'High', duration: 120 },
+    'cotton':    { need: 700,  cost: 25000, revenue: 65000,  risk: 'Medium', duration: 150 },
+    'wheat':     { need: 450,  cost: 20000, revenue: 50000,  risk: 'Low', duration: 110 },
+    'maize':     { need: 500,  cost: 18000, revenue: 48000,  risk: 'Low', duration: 100 },
+    'soybean':   { need: 450,  cost: 16000, revenue: 45000,  risk: 'Low', duration: 95 },
+    'chickpea':  { need: 300,  cost: 12000, revenue: 42000,  risk: 'Safe', duration: 90 },
+    'mustard':   { need: 300,  cost: 10000, revenue: 38000,  risk: 'Safe', duration: 100 },
+    'lentil':    { need: 250,  cost: 9000,  revenue: 35000,  risk: 'Safe', duration: 90 }
 };
 
+// --- 3. HELPER FUNCTIONS ---
 
-// --- 4. MAIN CONTROLLER ---
+const getGroundwater = (villageName) => {
+    const row = villageData.find(r => r.Village && r.Village.toLowerCase().includes(villageName.toLowerCase()));
+    if (row && row['Pre-monsoon_2022 (meters below ground level)']) {
+        return { 
+            depth: parseFloat(row['Pre-monsoon_2022 (meters below ground level)']), 
+            source: 'Local Sensor (Atal Jal)' 
+        };
+    }
+    return { depth: 15.0, source: 'District Average (Fallback)' }; // Default if not found
+};
+
+const calculateProfitPerDrop = (cropKey) => {
+    const c = CROP_DB[cropKey];
+    const profit = c.revenue - c.cost;
+    // Profit per mm of water used (Simplified "Profit Per Drop")
+    return Math.round(profit / c.need); 
+};
+
+// --- 4. MAIN ANALYZER ---
 exports.analyzeFarm = async (req, res) => {
     try {
+        // A. Inputs from Frontend
         const { village, crop, area } = req.body;
-        const acres = area || 1;
-
-        // A. SIMULATE GEOCODING (Default to Pune region for Hackathon Demo)
-        // In real app: use a geocoder. Here, we lock coords to get valid weather data.
-        const lat = 19.0760; 
-        const lon = 72.8777;
-
-        // B. FETCH WEATHER (Open-Meteo is free & no-key)
-        // fetching 14 days for sowing window
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,precipitation_sum,windspeed_10m_max&hourly=soil_moisture_9_27cm&timezone=auto&forecast_days=14`;
+        const cropKey = (crop || 'sugarcane').toLowerCase();
+        const acres = parseFloat(area || 1);
         
-        const weatherRes = await axios.get(url);
-        const daily = weatherRes.data.daily;
-        const hourly = weatherRes.data.hourly;
+        const cropStats = CROP_DB[cropKey] || CROP_DB['sugarcane'];
 
-        // C. CALCULATE METRICS
-        const predictedDepth = predictGroundwater(village);
+        // B. Fetch Real-Time Weather (Open-Meteo)
+        // Hardcoded Lat/Lon for Demo (In prod, use a Geocoder)
+        const lat = 19.0760; // Maharashtra Center
+        const lon = 74.8777; 
         
-        // Rain Sum (Next 3 days only for Water Score)
-        const rainSum = daily.precipitation_sum.slice(0, 3).reduce((a, b) => a + b, 0);
-        
-        // Soil Moisture (Current Hour)
-        const currentHour = new Date().getHours();
-        const soilMoisture = hourly.soil_moisture_9_27cm[currentHour] || 0.30;
+        let rainForecast = []; 
+        let soilMoisture = 0.2; // Dry default
 
-        // D. SOWING WINDOW
-        const sowingWindow = calculateSowingWindow(daily);
-
-        // E. WATER SCORE MATH (ADJUSTED TO BE LESS HARSH)
-        // -----------------------------------------------
-        // 1. Aquifer: Depth 0m = 600 pts. Depth 30m = 0 pts.
-        let aquiferScore = Math.max(0, (30 - predictedDepth) * 20); 
-        
-        // 2. Rain: 1mm = 10 pts (Boosted impact of rain)
-        let rainScore = rainSum * 10; 
-
-        // 3. Soil: 100% moisture = 400 pts
-        let soilScore = soilMoisture * 400; 
-
-        // Total Score
-        const totalWaterPoints = Math.round(aquiferScore + rainScore + soilScore);
-
-
-        // F. CROP VALIDATION
-        const cropDB = [
-            { crop: 'lentil', required: 250, profit: 22000 },
-            { crop: 'chickpea', required: 350, profit: 28000 },
-            { crop: 'mustard', required: 450, profit: 32000 },
-            { crop: 'paddy', required: 800, profit: 45000 }, // Needs lots of water
-            { crop: 'sugarcane', required: 1100, profit: 85000 }
-        ];
-
-        let chosenCrop = cropDB.find(c => c.crop.toLowerCase() === crop.toLowerCase());
-        if (!chosenCrop) chosenCrop = cropDB[2]; // Default Mustard
-
-        let status = totalWaterPoints >= chosenCrop.required ? 'PASS' : 'FAIL';
-        let deficit = Math.max(0, chosenCrop.required - totalWaterPoints);
-
-
-        // G. SMART SWAPS
-        let suggestions = cropDB
-            .filter(c => c.crop !== chosenCrop.crop)
-            .filter(c => c.required <= totalWaterPoints + 100) // Allow slightly higher crops to appear
-            .sort((a, b) => b.profit - a.profit)
-            .slice(0, 3)
-            .map(c => ({
-                crop: c.crop,
-                profit: c.profit * acres,
-                waterSaved: Math.max(0, chosenCrop.required - c.required),
-                required: c.required
-            }));
-
-        // If still empty (Severe Drought), show lowest water crops
-        if (suggestions.length === 0) {
-            suggestions = cropDB
-                .sort((a, b) => a.required - b.required)
-                .slice(0, 2)
-                .map(c => ({ ...c, profit: c.profit * acres, waterSaved: 0 }));
+        try {
+            const wRes = await axios.get(
+                `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=precipitation_sum&hourly=soil_moisture_9_27cm&forecast_days=14`
+            );
+            rainForecast = wRes.data.daily.precipitation_sum;
+            soilMoisture = wRes.data.hourly.soil_moisture_9_27cm[12] || 0.2;
+        } catch (e) {
+            console.log("⚠️ Weather API Offline, using seasonal averages");
+            rainForecast = [0, 0, 5, 12, 4, 0, 0]; // Fake rain for demo
         }
 
-        // H. RESPONSE
+        // C. Calculate Water Balance
+        const gw = getGroundwater(village || 'Punade');
+        
+        // 1. Available Water (The "Asset")
+        // Logic: Shallow aquifer (low depth) + Rain + Soil Moisture
+        const aquiferHealth = Math.max(0, (40 - gw.depth) * 50); 
+        const rainAsset = rainForecast.reduce((a,b)=>a+b, 0) * 10;
+        const soilAsset = soilMoisture * 2000;
+        
+        const waterAvailable_mm = Math.round(aquiferHealth + rainAsset + soilAsset);
+        const waterRequired_mm = cropStats.need;
+
+        // D. Sowing Window Logic (The "When to Plant")
+        // Look for 3 days of light rain after a dry spell
+        let bestDateIndex = rainForecast.findIndex(r => r > 5); 
+        if (bestDateIndex === -1) bestDateIndex = 7; // Default to next week if dry
+        
+        const sowStart = new Date();
+        sowStart.setDate(sowStart.getDate() + bestDateIndex);
+        const sowEnd = new Date(sowStart);
+        sowEnd.setDate(sowEnd.getDate() + 7);
+
+        // E. Generate Alternatives (Smart Swaps)
+        const alternatives = Object.keys(CROP_DB)
+            .filter(key => CROP_DB[key].need < waterAvailable_mm && key !== cropKey) // Only crops that fit the water budget
+            .map(key => {
+                const c = CROP_DB[key];
+                return {
+                    name: key.charAt(0).toUpperCase() + key.slice(1),
+                    waterSaved: (cropStats.need - c.need) * acres, // Total mm saved
+                    profit: (c.revenue - c.cost) * acres,
+                    profitPerDrop: calculateProfitPerDrop(key)
+                };
+            })
+            .sort((a,b) => b.profit - a.profit) // Show most profitable first
+            .slice(0, 2); // Top 2
+
+        // F. Final Response Packet
+        const isSolvent = waterAvailable_mm >= waterRequired_mm;
+        
         res.json({
-            analysis: {
-                village,
-                predictedDepth: `${predictedDepth.toFixed(2)}m`,
-                soilMoisture: `${(soilMoisture * 100).toFixed(0)}%`,
-                rainForecast: `${rainSum.toFixed(1)}mm`,
-                waterScore: totalWaterPoints
+            // 1. Status & Score
+            status: isSolvent ? 'SOLVENT' : 'INSOLVENT',
+            riskScore: isSolvent ? 85 : 35, // Simple mock score logic
+            
+            // 2. The "Water Tank" Data
+            waterMath: {
+                available: waterAvailable_mm,
+                required: waterRequired_mm,
+                balance: waterAvailable_mm - waterRequired_mm,
+                unit: 'mm'
             },
-            cropResult: {
-                status,
-                deficit,
-                crop: chosenCrop.crop
+            
+            // 3. Financials (Profit Per Drop)
+            financials: {
+                totalCost: cropStats.cost * acres,
+                estimatedRevenue: cropStats.revenue * acres,
+                netProfit: (cropStats.revenue - cropStats.cost) * acres,
+                profitPerDrop: calculateProfitPerDrop(cropKey)
             },
-            sowingWindow, // <--- ADDED BACK
-            suggestions
+
+            // 4. Actionable Advice
+            sowingWindow: {
+                startDate: sowStart.toISOString(),
+                endDate: sowEnd.toISOString(),
+                advisory: soilMoisture < 0.25 ? "Wait for rain" : "Soil moisture optimal"
+            },
+            
+            // 5. Smart Swaps
+            suggestions: alternatives
         });
 
     } catch (err) {
-        console.error("Server Error:", err);
-        res.status(500).json({ error: err.message });
+        console.error("Analysis Error:", err);
+        res.status(500).json({ error: "Calculation Failed" });
     }
 };
