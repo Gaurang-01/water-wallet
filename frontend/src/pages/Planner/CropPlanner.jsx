@@ -2,191 +2,148 @@ import React, { useState } from 'react';
 import './CropPlanner.css';
 
 const CropPlanner = () => {
-  const [selectedCrop, setSelectedCrop] = useState('mustard');
-  const [area, setArea] = useState(1);
-  const [village, setVillage] = useState('Punade'); // Default for demo
-
+  const [formData, setFormData] = useState({ village: 'Punade', crop: 'mustard', area: 1 });
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleCheck = async () => {
     setLoading(true);
-    setError('');
-    setResult(null);
-
+    setErrorMsg('');
+    setResult(null); 
+    
     try {
-      // Ensure your backend is running on port 5000
       const res = await fetch('http://localhost:5000/api/water/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          village: village,
-          crop: selectedCrop,
-          area: Number(area)
-        })
+        body: JSON.stringify(formData)
       });
-
+      
       const data = await res.json();
-      
-      if (!res.ok) throw new Error(data.error || "Analysis failed");
-      
+      if (!res.ok) throw new Error(data.error || "Server Error");
       setResult(data);
     } catch (err) {
       console.error(err);
-      setError("Could not connect to Water Engine. Is the backend running?");
+      setErrorMsg("Ensure Backend is running & Files are in correct folder.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Helper: Calculate Width of Score Bar (Max 100%)
-  const getScoreWidth = (score) => Math.min((score / 1000) * 100, 100) + "%";
-
-  // Helper: Color Code the Score
   const getScoreColor = (score) => {
-    if(score < 300) return '#ef4444'; // Red (Danger)
-    if(score < 600) return '#eab308'; // Yellow (Warning)
-    return '#22c55e'; // Green (Safe)
+      if(!score) return '#e2e8f0'; 
+      return score < 50 ? '#ef4444' : score < 75 ? '#eab308' : '#22c55e';
   };
 
   return (
     <div className="page-content">
       <div className="planner-header">
-        <h1>🚜 Crop Solvency Planner</h1>
-        <p>AI-driven viability check based on Real-time Soil Moisture & Aquifer Depth.</p>
+        <h1>🏦 Climate Credit Score</h1>
+        <p>Evaluating Loan Eligibility based on Water Solvency</p>
       </div>
 
-      {/* --- INPUT SECTION --- */}
       <div className="planner-form-card">
-        <div className="input-group">
-          <label>Village Name</label>
-          <input
-            placeholder="e.g. Punade, Akola"
-            value={village}
-            onChange={(e) => setVillage(e.target.value)}
-          />
-        </div>
-
         <div className="row-group">
-          <div className="input-group">
-            <label>Crop Selection</label>
-            <select
-              value={selectedCrop}
-              onChange={(e) => setSelectedCrop(e.target.value)}
-            >
-              <option value="lentil">Lentil (Low Water)</option>
-              <option value="chickpea">Chickpea (Medium)</option>
-              <option value="mustard">Mustard (Medium)</option>
-              <option value="paddy">Paddy (High Water)</option>
-              <option value="sugarcane">Sugarcane (Extreme)</option>
-            </select>
-          </div>
-
-          <div className="input-group">
-            <label>Farm Area (Acres)</label>
-            <input
-              type="number"
-              value={area}
-              min="0.5"
-              step="0.5"
-              onChange={(e) => setArea(e.target.value)}
-            />
-          </div>
+            <div className="input-group">
+                <label>Village Name</label>
+                <input value={formData.village} onChange={(e)=>setFormData({...formData, village: e.target.value})} />
+            </div>
+            <div className="input-group">
+                <label>Crop Plan</label>
+                <select value={formData.crop} onChange={(e)=>setFormData({...formData, crop: e.target.value})}>
+                    <option value="lentil">Lentil</option>
+                    <option value="chickpea">Chickpea</option>
+                    <option value="mustard">Mustard</option>
+                    <option value="paddy">Paddy</option>
+                    <option value="sugarcane">Sugarcane</option>
+                </select>
+            </div>
+            <div className="input-group">
+                <label>Acres</label>
+                <input type="number" value={formData.area} onChange={(e)=>setFormData({...formData, area: Number(e.target.value)})} />
+            </div>
         </div>
-
         <button onClick={handleCheck} disabled={loading} className="analyze-btn">
-          {loading ? 'Analyzing Soil & Water...' : 'Run Simulation'}
+          {loading ? 'Calculating Risk...' : 'Check Credit Eligibility'}
         </button>
         
-        {error && <p className="error-msg">{error}</p>}
+        {errorMsg && <div className="error-msg" style={{marginTop:'15px'}}>⚠️ {errorMsg}</div>}
       </div>
 
-      {/* --- RESULTS SECTION --- */}
+      {/* --- SAFE RENDER SECTION --- */}
       {result && (
         <div className="results-container">
           
-          {/* 1. PASS/FAIL BANNER */}
-          <div className={`status-banner ${result.cropResult.status.toLowerCase()}`}>
-            <h2>
-              {result.cropResult.status === 'PASS' ? '✅ VIABLE CROP' : '⚠️ HIGH RISK'}
-            </h2>
-            <p>
-              {result.cropResult.status === 'PASS' 
-                ? `Soil moisture and aquifer levels are sufficient for ${selectedCrop}.` 
-                : `Water deficit detected! ${selectedCrop} requires more water than currently available.`}
-            </p>
-          </div>
-
-          {/* 2. WATER SCORE GAUGE */}
-          <div className="score-card">
-            <div className="score-header">
-              <span>Water Availability Score</span>
-              <strong>{result.analysis.waterScore} / 1000</strong>
-            </div>
-            
-            <div className="progress-bar-bg">
-              <div 
-                className="progress-bar-fill" 
-                style={{ 
-                  width: getScoreWidth(result.analysis.waterScore),
-                  backgroundColor: getScoreColor(result.analysis.waterScore)
-                }}
-              ></div>
-            </div>
-            
-            <div className="metrics-row">
-              <div className="metric">
-                <span className="label">Groundwater</span>
-                <span className="value">{result.analysis.predictedDepth}</span>
-              </div>
-              <div className="metric">
-                <span className="label">Soil Moisture</span>
-                <span className="value">{result.analysis.soilMoisture}</span>
-              </div>
-              <div className="metric">
-                <span className="label">Rain Forecast</span>
-                <span className="value">{result.analysis.rainForecast}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* 3. SMART SWAP SUGGESTIONS */}
-          {result.suggestions && result.suggestions.length > 0 ? (
-            <div className="suggestions-section">
-              <h3>
-                {result.cropResult.status === 'FAIL' 
-                  ? '💡 Recommended Safer Swaps' 
-                  : '💰 Higher Profit Alternatives'}
-              </h3>
-              
-              <div className="suggestions-list">
-                {result.suggestions.map((s, i) => (
-                  <div key={i} className="suggestion-item">
-                    <div className="s-left">
-                      <strong>{s.crop.toUpperCase()}</strong>
-                      <span className="save-tag">
-                        {s.waterSaved > 0 
-                          ? `Saves ${s.waterSaved} pts water` 
-                          : 'Optimal Choice'}
-                      </span>
+          {/* 1. CREDIT SCORE CARD */}
+          {result?.score && (
+            <div className="credit-card" style={{
+                background: `linear-gradient(135deg, ${getScoreColor(result.score.value)} 0%, #1e293b 100%)`,
+                color: 'white', padding: '20px', borderRadius: '15px', marginBottom: '20px', boxShadow: '0 10px 20px rgba(0,0,0,0.2)'
+            }}>
+                <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                    <div>
+                        <h3 style={{margin:0, opacity:0.9, fontSize:'0.8rem'}}>SOLVENCY SCORE</h3>
+                        <h1 style={{fontSize:'3.5rem', margin:0, fontWeight:'800'}}>{result.score.value}</h1>
                     </div>
-                    <div className="s-right">
-                      <span className="profit-text">₹{s.profit.toLocaleString()}</span>
-                      <small>Est. Revenue</small>
+                    <div style={{textAlign:'right'}}>
+                        <div style={{background:'rgba(255,255,255,0.2)', padding:'5px 12px', borderRadius:'6px', fontWeight:'bold'}}>
+                            {result.score.category}
+                        </div>
+                        <p style={{marginTop:'10px', fontSize:'0.8rem'}}>Source: {result.meta?.source}</p>
                     </div>
-                  </div>
-                ))}
-              </div>
+                </div>
             </div>
-          ) : (
-             <div className="suggestions-section">
-               <p style={{textAlign:'center', color:'#888', fontStyle:'italic'}}>
-                 No alternative crops recommended for these soil conditions.
-               </p>
+          )}
+
+          {/* 2. SOWING WINDOW (The part that was crashing!) */}
+          {result?.sowingWindow && (
+             <div className="sowing-card" style={{
+                 background: '#f0f9ff', padding: '15px', borderRadius: '8px', marginBottom: '20px', 
+                 border: '1px solid #bae6fd', display: 'flex', alignItems: 'center', gap: '15px'
+             }}>
+                 <span style={{fontSize: '24px'}}>🗓️</span>
+                 <div>
+                     <strong style={{color:'#0369a1'}}>Sowing Window (Next 14 Days)</strong>
+                     <div style={{color:'#0c4a6e'}}>
+                        {/* SAFE DATES: We check if they exist first */}
+                        {result.sowingWindow.start ? new Date(result.sowingWindow.start).toLocaleDateString() : 'TBD'} 
+                        {' ➔ '} 
+                        {result.sowingWindow.end ? new Date(result.sowingWindow.end).toLocaleDateString() : 'TBD'}
+                     </div>
+                 </div>
              </div>
           )}
 
+          {/* 3. METRICS */}
+          <div className="score-card">
+            <div className="metrics-row">
+                <div className="metric">
+                    <span className="label">Water Assets</span>
+                    <span className="value" style={{color:'#22c55e'}}>+{result?.analysis?.waterAssets || 0}</span>
+                </div>
+                <div className="metric">
+                    <span className="label">Crop Liability</span>
+                    <span className="value" style={{color:'#ef4444'}}>-{result?.analysis?.cropLiability || 0}</span>
+                </div>
+                <div className="metric">
+                    <span className="label">Groundwater</span>
+                    <span className="value">{result?.analysis?.depth || 'N/A'}</span>
+                </div>
+            </div>
+          </div>
+          
+          {/* 4. SUGGESTIONS */}
+          {result?.suggestions?.length > 0 && (
+              <div className="suggestions-section">
+                  <h3>✅ Lower Risk Alternatives</h3>
+                  {result.suggestions.map((s, i) => (
+                      <div key={i} className="suggestion-item">
+                          <strong>{s.crop.toUpperCase()}</strong>
+                          <span className="save-tag">Cost: {s.cost} (Save {result.analysis.cropLiability - s.cost} pts)</span>
+                      </div>
+                  ))}
+              </div>
+          )}
         </div>
       )}
     </div>

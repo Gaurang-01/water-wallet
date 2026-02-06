@@ -1,24 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import MetricCard from '../../components/common/MetricCard'; // Keeping your component
+import MetricCard from '../../components/common/MetricCard'; 
 import './Dashboard.css';
 
 const Dashboard = () => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   
-  // You might want to let users pick this in the UI later, 
-  // but for now we keep state so we can easily switch it.
-  const [selectedCrop, setSelectedCrop] = useState("chickpea"); 
+  // Default to standard crop for the dashboard view
+  const [selectedCrop, setSelectedCrop] = useState("mustard"); 
 
   const fetchData = async () => {
-    const location = localStorage.getItem("location") || "Punade"; // Default village
+    const location = localStorage.getItem("location") || "Punade"; 
     setLoading(true);
+    setError(false);
 
     try {
       const res = await fetch("http://localhost:5000/api/water/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // Mapping your frontend "location" to backend "village"
         body: JSON.stringify({
           village: location, 
           crop: selectedCrop,
@@ -27,9 +27,16 @@ const Dashboard = () => {
       });
 
       const result = await res.json();
+      
+      // Safety check: Ensure result has the expected structure
+      if (!result || !result.analysis) {
+          throw new Error("Invalid Data Structure");
+      }
+      
       setData(result);
     } catch (err) {
       console.error("Failed to fetch water data", err);
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -39,98 +46,112 @@ const Dashboard = () => {
     fetchData();
     window.addEventListener("locationChanged", fetchData);
     return () => window.removeEventListener("locationChanged", fetchData);
-  }, [selectedCrop]); // Re-run if crop changes
+  }, [selectedCrop]);
 
-  if (loading) return <div className="page-content">Analyzing Soil & Aquifers...</div>;
+  if (loading) return <div className="page-content">Connecting to Water Satellites...</div>;
+  if (error) return <div className="page-content">⚠️ Connection Error. Ensure Backend is running.</div>;
   if (!data) return <div className="page-content">No Data Found</div>;
-
-  // Helper to color-code the score
-  const getScoreColor = (score) => {
-    if (score < 300) return 'var(--danger, #ef4444)';
-    if (score < 600) return 'var(--warning, #eab308)';
-    return 'var(--success, #22c55e)';
-  };
 
   return (
     <div className="page-content">
       <div className="page-header">
-        <h1>Aquifer Inventory</h1>
+        <h1>🏦 Solvency Dashboard</h1>
         <p>
-          Real-time groundwater audit for Village: 
-          <strong> {data.analysis.village || "Unknown"}</strong>
+           Credit Risk Audit for Village: 
+           <strong> {localStorage.getItem("location") || "Punade"}</strong>
+           <span style={{marginLeft: '10px', fontSize:'0.8em', color:'#666'}}>
+             (Source: {data.meta?.source || 'Hybrid'})
+           </span>
         </p>
       </div>
 
       {/* --- TOP METRICS GRID --- */}
       <div className="dashboard-grid">
-        {/* Metric 1: The New "Water Score" */}
+        {/* Metric 1: Solvency Score (The USP) */}
         <MetricCard
-          title="Water Availability Score"
-          value={data.analysis.waterScore}
-          unit="/ 1000"
-          trend={data.cropResult.status === 'PASS' ? 'High' : 'Low'}
+          title="Solvency Score"
+          value={data.score?.value || 0}
+          unit="/ 100"
+          trend={data.score?.value > 75 ? 'High' : 'Low'}
         />
 
-        {/* Metric 2: Groundwater (Predicted) */}
+        {/* Metric 2: Groundwater Depth */}
         <MetricCard
-          title="Predicted Depth"
-          value={data.analysis.predictedDepth}
-          unit="" // Unit is part of the string in new backend
+          title="Water Depth"
+          value={data.analysis?.depth || "N/A"}
+          unit="" 
         />
 
-        {/* Metric 3: Soil Moisture (The new API feature) */}
+        {/* Metric 3: Water Assets (New Metric) */}
         <MetricCard
-          title="Soil Moisture"
-          value={data.analysis.soilMoisture}
-          unit=""
+          title="Water Assets"
+          value={data.analysis?.waterAssets || 0}
+          unit="pts"
         />
         
-        {/* Metric 4: Rainfall Forecast */}
+        {/* Metric 4: Crop Liability (Cost) */}
         <MetricCard
-            title="3-Day Rainfall"
-            value={data.analysis.rainForecast}
-            unit=""
+            title="Crop Liability"
+            value={data.analysis?.cropLiability || 0}
+            unit="pts"
         />
       </div>
 
-      {/* --- CROP VIABILITY CARD (New Section) --- */}
+      {/* --- SOWING WINDOW (New Feature) --- */}
+      {data.sowingWindow && (
+        <div className="analysis-section" style={{marginTop: '20px'}}>
+             <div style={{
+                 background: '#f0f9ff', 
+                 padding: '15px', 
+                 borderRadius: '12px', 
+                 border: '1px solid #bae6fd',
+                 display: 'flex', alignItems: 'center', gap: '15px'
+             }}>
+                 <span style={{fontSize: '24px'}}>🗓️</span>
+                 <div>
+                     <strong style={{color:'#0369a1'}}>Recommended Sowing Window</strong>
+                     <div style={{color:'#0c4a6e'}}>
+                        {data.sowingWindow.start ? new Date(data.sowingWindow.start).toLocaleDateString() : 'Pending Forecast'} 
+                        {' ➔ '} 
+                        {data.sowingWindow.end ? new Date(data.sowingWindow.end).toLocaleDateString() : ''}
+                     </div>
+                 </div>
+             </div>
+        </div>
+      )}
+
+      {/* --- STATUS CARD --- */}
       <div className="analysis-section" style={{ marginTop: '2rem' }}>
         <div 
-            className={`status-card ${data.cropResult.status.toLowerCase()}`}
+            className="status-card"
             style={{
                 padding: '20px',
                 borderRadius: '12px',
-                background: data.cropResult.status === 'PASS' ? '#dcfce7' : '#fee2e2',
-                border: `2px solid ${data.cropResult.status === 'PASS' ? '#22c55e' : '#ef4444'}`,
+                background: data.score?.category.includes("Approved") ? '#dcfce7' : '#fee2e2',
+                border: `2px solid ${data.score?.category.includes("Approved") ? '#22c55e' : '#ef4444'}`,
                 textAlign: 'center'
             }}
         >
-            <h2 style={{ margin: 0, color: data.cropResult.status === 'PASS' ? '#166534' : '#991b1b' }}>
-                {selectedCrop.toUpperCase()}: {data.cropResult.status}
+            <h2 style={{ margin: 0, color: data.score?.category.includes("Approved") ? '#166534' : '#991b1b' }}>
+                {selectedCrop.toUpperCase()}: {data.score?.category}
             </h2>
-            
-            {data.cropResult.status === 'FAIL' ? (
-                <p style={{ color: '#991b1b' }}>
-                   ⚠️ Water Deficit: <strong>{data.cropResult.deficit} points</strong>. 
-                   Groundwater is too deep and soil is too dry for this crop.
-                </p>
-            ) : (
-                <p style={{ color: '#166534' }}>
-                   ✅ Safe to sow. Moisture levels are adequate.
-                </p>
-            )}
+            <p style={{marginTop:'10px'}}>
+                {data.score?.category.includes("Approved") 
+                    ? "Credit Approved. Water assets exceed crop liabilities." 
+                    : "High Risk. Consider swapping crops to improve solvency."}
+            </p>
         </div>
       </div>
 
-      {/* --- SMART SUGGESTIONS (New Section) --- */}
+      {/* --- SUGGESTIONS --- */}
       {data.suggestions && data.suggestions.length > 0 && (
         <div className="suggestions-box" style={{ marginTop: '20px' }}>
-          <h3>💡 Recommended Swaps</h3>
+          <h3>💡 Low-Risk Alternatives</h3>
           <div className="suggestion-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' }}>
             {data.suggestions.map((s, idx) => (
-                <div key={idx} style={{ background: 'white', padding: '15px', borderRadius: '8px', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
+                <div key={idx} style={{ background: 'white', padding: '15px', borderRadius: '8px', border:'1px solid #e5e7eb' }}>
                     <strong>{s.crop.toUpperCase()}</strong>
-                    <div style={{ fontSize: '0.9rem', color: '#666' }}>Profit: ₹{s.profit}</div>
+                    <div style={{ fontSize: '0.9rem', color: '#15803d', fontWeight:'bold' }}>Cost: {s.cost} pts</div>
                 </div>
             ))}
           </div>

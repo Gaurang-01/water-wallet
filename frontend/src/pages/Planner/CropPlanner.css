@@ -230,3 +230,17 @@ input:focus, select:focus {
 }
 
 .s-right small { color: #64748b; font-size: 0.8rem; }
+.data-badge {
+    display: flex;
+    justify-content: space-between;
+    background: #1e293b;
+    color: #94a3b8;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    margin-bottom: 15px;
+}
+.data-badge strong {
+    color: #fff;
+    margin-left: 5px;
+}
