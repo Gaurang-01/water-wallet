@@ -4,104 +4,165 @@ import './CropPlanner.css';
 const CropPlanner = () => {
   const [selectedCrop, setSelectedCrop] = useState('mustard');
   const [area, setArea] = useState(1);
-  const [location, setLocation] = useState('Pune');
+  const [village, setVillage] = useState('Punade'); // Default value for demo
 
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleCheck = async () => {
-    try {
-      setLoading(true);
+    setLoading(true);
+    setError('');
+    setResult(null);
 
+    try {
       const res = await fetch('http://localhost:5000/api/water/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          locationName: location,
+          village: village,  // Changed from locationName
           crop: selectedCrop,
           area: Number(area)
         })
       });
 
       const data = await res.json();
+      
+      if (!res.ok) throw new Error(data.error || "Analysis failed");
+      
       setResult(data);
     } catch (err) {
       console.error(err);
+      setError("Could not connect to Water Engine. Ensure backend is running.");
     } finally {
       setLoading(false);
     }
   };
 
+  // Helper to visualize the score bar
+  const getScoreWidth = (score) => Math.min((score / 1000) * 100, 100) + "%";
+  const getScoreColor = (score) => {
+    if(score < 300) return '#ef4444'; // Red
+    if(score < 600) return '#eab308'; // Yellow
+    return '#22c55e'; // Green
+  };
+
   return (
     <div className="page-content">
-      <h1>Crop Solvency Planner</h1>
-
-      {/* INPUTS */}
-      <div className="planner-form">
-
-        <input
-          placeholder="Village / City"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-        />
-
-        <select
-          value={selectedCrop}
-          onChange={(e) => setSelectedCrop(e.target.value)}
-        >
-          <option value="sugarcane">Sugarcane</option>
-          <option value="paddy">Paddy</option>
-          <option value="mustard">Mustard</option>
-          <option value="lentil">Lentil</option>
-        </select>
-
-        <input
-          type="number"
-          value={area}
-          onChange={(e) => setArea(e.target.value)}
-          placeholder="Acres"
-        />
-
-        <button onClick={handleCheck}>
-          {loading ? 'Checking...' : 'Check Viability'}
-        </button>
+      <div className="planner-header">
+        <h1>🚜 Crop Solvency Planner</h1>
+        <p>AI-driven viability check based on Soil Moisture & Aquifer Depth.</p>
       </div>
 
-      {/* RESULTS */}
+      {/* INPUT SECTION */}
+      <div className="planner-form-card">
+        <div className="input-group">
+          <label>Village Name</label>
+          <input
+            placeholder="e.g. Punade, Akola"
+            value={village}
+            onChange={(e) => setVillage(e.target.value)}
+          />
+        </div>
+
+        <div className="row-group">
+          <div className="input-group">
+            <label>Crop</label>
+            <select
+              value={selectedCrop}
+              onChange={(e) => setSelectedCrop(e.target.value)}
+            >
+              <option value="lentil">Lentil (Low Water)</option>
+              <option value="chickpea">Chickpea (Med)</option>
+              <option value="mustard">Mustard (Med)</option>
+              <option value="paddy">Paddy (High)</option>
+              <option value="sugarcane">Sugarcane (Extreme)</option>
+            </select>
+          </div>
+
+          <div className="input-group">
+            <label>Area (Acres)</label>
+            <input
+              type="number"
+              value={area}
+              onChange={(e) => setArea(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <button onClick={handleCheck} disabled={loading} className="analyze-btn">
+          {loading ? 'Analyzing Soil & Water...' : 'Run Simulation'}
+        </button>
+        
+        {error && <p className="error-msg">{error}</p>}
+      </div>
+
+      {/* RESULTS SECTION */}
       {result && (
-        <div className="planner-result">
+        <div className="results-container">
+          
+          {/* 1. MAIN STATUS CARD */}
+          <div className={`status-banner ${result.cropResult.status.toLowerCase()}`}>
+            <h2>{result.cropResult.status === 'PASS' ? '✅ VIABLE' : '⚠️ HIGH RISK'}</h2>
+            <p>
+              {result.cropResult.status === 'PASS' 
+                ? `Conditions are safe for ${selectedCrop}.` 
+                : `Water deficit detected. ${selectedCrop} requires more water than available.`}
+            </p>
+          </div>
 
-          <h2>Status: {result.cropResult.status}</h2>
+          {/* 2. WATER SCORE VISUALIZATION */}
+          <div className="score-card">
+            <div className="score-header">
+              <span>Water Availability Score</span>
+              <strong>{result.analysis.waterScore} / 1000</strong>
+            </div>
+            <div className="progress-bar-bg">
+              <div 
+                className="progress-bar-fill" 
+                style={{ 
+                  width: getScoreWidth(result.analysis.waterScore),
+                  backgroundColor: getScoreColor(result.analysis.waterScore)
+                }}
+              ></div>
+            </div>
+            
+            <div className="metrics-row">
+              <div className="metric">
+                <span className="label">Groundwater</span>
+                <span className="value">{result.analysis.predictedDepth}</span>
+              </div>
+              <div className="metric">
+                <span className="label">Soil Moisture</span>
+                <span className="value">{result.analysis.soilMoisture}</span>
+              </div>
+              <div className="metric">
+                <span className="label">Rain Forecast</span>
+                <span className="value">{result.analysis.rainForecast}</span>
+              </div>
+            </div>
+          </div>
 
-          <p>Available Water: {result.waterAvailable} mm</p>
-
-          {result.cropResult.deficit && (
-            <p>Deficit: {result.cropResult.deficit.toFixed(1)} mm</p>
-          )}
-
-          {/* SOWING WINDOW */}
-          {result.sowingWindow && (
-            <div className="sowing-box">
-              🌱 Best Sowing Window:
-              <br />
-              {new Date(result.sowingWindow.start).toLocaleString()}
-              {" → "}
-              {new Date(result.sowingWindow.end).toLocaleString()}
+          {/* 3. SUGGESTIONS */}
+          {result.suggestions.length > 0 && (
+            <div className="suggestions-section">
+              <h3>💡 Smart Swaps (Maximize Profit)</h3>
+              <div className="suggestions-list">
+                {result.suggestions.map((s, i) => (
+                  <div key={i} className="suggestion-item">
+                    <div className="s-left">
+                      <strong>{s.crop.toUpperCase()}</strong>
+                      <small>Requires: {s.required} pts</small>
+                    </div>
+                    <div className="s-right">
+                      <span>₹{s.profit.toLocaleString()}</span>
+                      <small>Est. Profit</small>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
-
-          {/* SUGGESTIONS */}
-          <h3>Smart Suggestions</h3>
-
-          {result.suggestions.map((s, i) => (
-            <div key={i} className="suggest-card">
-              <b>{s.crop}</b>
-              <span>Water: {s.water} mm</span>
-              <span>Profit: ₹{s.profit.toLocaleString()}</span>
-              <span>Score: {s.score.toFixed(2)}</span>
-            </div>
-          ))}
-
         </div>
       )}
     </div>
