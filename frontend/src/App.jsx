@@ -2,18 +2,17 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Outlet, Navigate } from 'react-router-dom';
 import { LanguageProvider } from './context/LanguageContext';
 
-import Navbar from './components/layout/Navbar.jsx'; // ✅ NEW
-// ❌ REMOVE Sidebar + Header imports
+import Navbar from './components/layout/Navbar.jsx';
 
 import LandingPage from './pages/Landing/LandingPage.jsx';
+import LoginPage from './pages/Login/LoginPage.jsx';
 import Dashboard from './pages/Dashboard/Dashboard.jsx';
 import CropPlanner from './pages/Planner/CropPlanner.jsx';
 import ProfitCalc from './pages/Profit/ProfitCalc.jsx';
 
 import './App.css';
 
-
-// ✅ NEW LAYOUT (Navbar instead of Sidebar/Header)
+// App Layout with Navbar
 const AppLayout = () => {
   return (
     <div className="app-container">
@@ -27,7 +26,6 @@ const AppLayout = () => {
   );
 };
 
-
 const App = () => {
   return (
     <LanguageProvider>
@@ -36,6 +34,9 @@ const App = () => {
 
           {/* Landing */}
           <Route path="/" element={<LandingPage />} />
+
+          {/* Login */}
+          <Route path="/login" element={<LoginPage />} />
 
           {/* App */}
           <Route path="/app" element={<AppLayout />}>
