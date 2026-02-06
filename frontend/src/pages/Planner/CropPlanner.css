@@ -195,3 +195,14 @@ input:focus {
     padding: 16px;
   }
 }
+.planner-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:40px;
+}
+
+@media(max-width:768px){
+  .planner-grid{
+    grid-template-columns: 1fr;
+  }
+}
