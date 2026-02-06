@@ -2,94 +2,108 @@ import React, { useState } from 'react';
 import './CropPlanner.css';
 
 const CropPlanner = () => {
-  const [selectedCrop, setSelectedCrop] = useState('Sugarcane');
-  const [showResult, setShowResult] = useState(false);
+  const [selectedCrop, setSelectedCrop] = useState('mustard');
+  const [area, setArea] = useState(1);
+  const [location, setLocation] = useState('Pune');
+
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleCheck = async () => {
+    try {
+      setLoading(true);
+
+      const res = await fetch('http://localhost:5000/api/water/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          locationName: location,
+          crop: selectedCrop,
+          area: Number(area)
+        })
+      });
+
+      const data = await res.json();
+      setResult(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="page-content">
-      <div className="page-header">
-        <h1>Crop Solvency Planner</h1>
-        <p>Check if your land has enough water budget for your crop.</p>
+      <h1>Crop Solvency Planner</h1>
+
+      {/* INPUTS */}
+      <div className="planner-form">
+
+        <input
+          placeholder="Village / City"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+        />
+
+        <select
+          value={selectedCrop}
+          onChange={(e) => setSelectedCrop(e.target.value)}
+        >
+          <option value="sugarcane">Sugarcane</option>
+          <option value="paddy">Paddy</option>
+          <option value="mustard">Mustard</option>
+          <option value="lentil">Lentil</option>
+        </select>
+
+        <input
+          type="number"
+          value={area}
+          onChange={(e) => setArea(e.target.value)}
+          placeholder="Acres"
+        />
+
+        <button onClick={handleCheck}>
+          {loading ? 'Checking...' : 'Check Viability'}
+        </button>
       </div>
 
-      <div className="planner-container">
-        {/* Input Section */}
-        <div className="input-card">
-          <h3>Sowing Details</h3>
-          <div className="form-group">
-            <label>Select Crop</label>
-            <select 
-              value={selectedCrop} 
-              onChange={(e) => {
-                setSelectedCrop(e.target.value);
-                setShowResult(false);
-              }}
-            >
-              <option value="Sugarcane">Sugarcane (High Water)</option>
-              <option value="Paddy">Paddy (Basmati)</option>
-              <option value="Mustard">Mustard (Low Water)</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label>Land Area (Acres)</label>
-            <input type="number" placeholder="e.g. 2.5" />
-          </div>
-          <button className="btn-primary" onClick={() => setShowResult(true)}>
-            Check Viability
-          </button>
+      {/* RESULTS */}
+      {result && (
+        <div className="planner-result">
+
+          <h2>Status: {result.cropResult.status}</h2>
+
+          <p>Available Water: {result.waterAvailable} mm</p>
+
+          {result.cropResult.deficit && (
+            <p>Deficit: {result.cropResult.deficit.toFixed(1)} mm</p>
+          )}
+
+          {/* SOWING WINDOW */}
+          {result.sowingWindow && (
+            <div className="sowing-box">
+              🌱 Best Sowing Window:
+              <br />
+              {new Date(result.sowingWindow.start).toLocaleString()}
+              {" → "}
+              {new Date(result.sowingWindow.end).toLocaleString()}
+            </div>
+          )}
+
+          {/* SUGGESTIONS */}
+          <h3>Smart Suggestions</h3>
+
+          {result.suggestions.map((s, i) => (
+            <div key={i} className="suggest-card">
+              <b>{s.crop}</b>
+              <span>Water: {s.water} mm</span>
+              <span>Profit: ₹{s.profit.toLocaleString()}</span>
+              <span>Score: {s.score.toFixed(2)}</span>
+            </div>
+          ))}
+
         </div>
-
-        {/* Results Section */}
-        {showResult && (
-          <div className="result-area">
-            {selectedCrop === 'Sugarcane' ? (
-              // INSOLVENT SCENARIO
-              <div className="alert-card danger">
-                <div className="alert-header">
-                  <span className="material-icons">warning</span>
-                  <h2>INSOLVENT: High Risk of Failure</h2>
-                </div>
-                <p>Your borewell will run dry in <strong>86 days</strong>.</p>
-                <div className="water-math">
-                  <div className="math-row">
-                    <span>Available Water:</span> <span>420 mm</span>
-                  </div>
-                  <div className="math-row red">
-                    <span>Required:</span> <span>- 1200 mm</span>
-                  </div>
-                  <div className="math-row total">
-                    <span>Deficit:</span> <span>780 mm</span>
-                  </div>
-                </div>
-                
-                <div className="smart-swap">
-                  <h3>💡 Smart-Swap Recommendation</h3>
-                  <div className="swap-card">
-                    <div className="swap-info">
-                      <h4>Switch to Mustard</h4>
-                      <p>Requires only 300mm water.</p>
-                    </div>
-                    <div className="swap-profit">
-                      <span>Est. Profit</span>
-                      <strong>₹45,000/acre</strong>
-                    </div>
-                    <button className="btn-outline">View Plan</button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              // SOLVENT SCENARIO
-              <div className="alert-card safe">
-                <div className="alert-header">
-                  <span className="material-icons">check_circle</span>
-                  <h2>SOLVENT: Safe to Grow</h2>
-                </div>
-                <p>You have excess water budget for this season.</p>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 };

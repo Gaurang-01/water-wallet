@@ -1,129 +1,61 @@
-const { getRainfall } = require("../services/weatherService");
-const { getForecast } = require("../services/forecastService");
-const { getPredictedGroundwater } = require("../services/groundwaterService");
+const axios = require('axios');
 
-const { getLatLonFromName } = require("../services/geocodeService");
-const { getDistrictFromLatLon } = require("../services/locationService");
-const { getMahaGroundwater } = require("../services/mahaGroundwaterService");
-
-const { calculateBalance } = require("../logic/waterLogic");
-const { checkCrop } = require("../logic/cropLogic");
-const { smartSwap } = require("../logic/smartSwapLogic");
-const { getSowingWindow } = require("../logic/sowingLogic");
-
-const crops = require("../data/crops.json");
+const cropDB = [
+  { crop: 'lentil', water: 220, profit: 23000 },
+  { crop: 'chickpea', water: 250, profit: 24000 },
+  { crop: 'mustard', water: 300, profit: 26000 },
+  { crop: 'paddy', water: 1200, profit: 30000 },
+  { crop: 'sugarcane', water: 1800, profit: 45000 }
+];
 
 exports.analyzeFarm = async (req, res) => {
   try {
-    const { locationName, lat, lon, crop, village } = req.body;
+    const { locationName, crop, area } = req.body;
 
-    // --------------------------------------------------
-    // 1️⃣ Resolve coordinates (name OR lat/lon)
-    // --------------------------------------------------
+    const acres = area || 1;
 
-    let finalLat = lat;
-    let finalLon = lon;
+    // DEMO values (replace with real later)
+    const groundwater = 311.4;
+    const rainfall = 0;
 
-    // if only location name is provided → geocode it
-    if (locationName && (!lat || !lon)) {
-      const coords = await getLatLonFromName(locationName);
+    const waterAvailable = groundwater + rainfall;
 
-      if (!coords) {
-        return res.status(400).json({ error: "Invalid location name" });
-      }
+    const chosen = cropDB.find(c => c.crop === crop);
 
-      finalLat = coords.lat;
-      finalLon = coords.lon;
-    }
+    const required = chosen.water * acres;
 
-    if (!finalLat || !finalLon) {
-      return res.status(400).json({ error: "Location required" });
-    }
+    const deficit = required > waterAvailable
+      ? required - waterAvailable
+      : null;
 
-    // --------------------------------------------------
-    // 2️⃣ Rainfall
-    // --------------------------------------------------
+    const status = deficit ? 'FAIL' : 'PASS';
 
-    const rainfall = await getRainfall(finalLat, finalLon);
+    const suggestions = cropDB
+      .map(c => ({
+        ...c,
+        profit: c.profit * acres,
+        score: c.profit / c.water
+      }))
+      .sort((a, b) => b.score - a.score);
 
-    // --------------------------------------------------
-    // 3️⃣ Detect district from GPS
-    // --------------------------------------------------
-
-    const location = await getDistrictFromLatLon(finalLat, finalLon);
-
-    // --------------------------------------------------
-    // 4️⃣ Groundwater logic (Hybrid)
-    // --------------------------------------------------
-
-    let groundwater = null;
-
-    // ✅ Maharashtra → real WRIS Excel data
-    if (
-      location?.state?.toLowerCase().includes("maharashtra")
-    ) {
-      groundwater = getMahaGroundwater(location.district);
-    }
-
-
-    // ✅ fallback → ML prediction
-    if (!groundwater) {
-      const depth = await getPredictedGroundwater(village || "");
-      groundwater = Math.max(0, 800 - depth * 20);
-    }
-
-    // --------------------------------------------------
-    // 5️⃣ Water balance
-    // --------------------------------------------------
-
-    const waterAvailable = calculateBalance(groundwater, rainfall);
-
-    // --------------------------------------------------
-    // 6️⃣ Crop solvency
-    // --------------------------------------------------
-
-    const cropResult = checkCrop(crop, waterAvailable);
-
-    // --------------------------------------------------
-    // 7️⃣ Smart crop suggestions
-    // --------------------------------------------------
-
-    const suggestions = smartSwap(waterAvailable, crops);
-
-    // --------------------------------------------------
-    // 8️⃣ Sowing window (safe)
-    // --------------------------------------------------
-
-    let sowingWindow = null;
-
-    try {
-      const forecast = await getForecast(finalLat, finalLon);
-      sowingWindow = getSowingWindow(forecast);
-    } catch (err) {
-      console.log("Forecast error:", err.message);
-    }
-
-    // --------------------------------------------------
-    // 9️⃣ Final response
-    // --------------------------------------------------
+    const sowingWindow = {
+      start: new Date(Date.now() + 86400000),
+      end: new Date(Date.now() + 3 * 86400000)
+    };
 
     res.json({
-      locationName,
-      coordinates: {
-        lat: finalLat,
-        lon: finalLon
-      },
-      location,
       rainfall,
       groundwater,
       waterAvailable,
-      cropResult,
+      cropResult: {
+        status,
+        deficit
+      },
       suggestions,
       sowingWindow
     });
 
   } catch (err) {
-    console.log(err);
     res.status(500).json({ error: err.message });
   }
 };
