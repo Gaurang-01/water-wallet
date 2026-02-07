@@ -196,7 +196,7 @@ def get_month_name(m):
 
 
 # ==========================================
-# 5. MAIN API ENDPOINT (Enhanced)
+# 5. MAIN API ENDPOINT (Enhanced with Hindi)
 # ==========================================
 @app.route('/api/analyze', methods=['POST'])
 def analyze():
@@ -206,8 +206,9 @@ def analyze():
     lat = d.get('lat', 19.0)
     lon = d.get('lon', 73.0)
     district = d.get('district', 'pune')
+    lang = d.get('lang', 'en')  # Get language preference
     
-    print(f"📊 Analyzing for: {crop_input} | Area: {area} hectares | District: {district}")
+    print(f"📊 Analyzing for: {crop_input} | Area: {area} hectares | District: {district} | Lang: {lang}")
     
     # STEP 1: Get NASA Satellite Features
     rain, moist, temp = get_nasa_features(lat, lon)
@@ -240,20 +241,33 @@ def analyze():
     else:
         in_season = curr_m >= s_start or curr_m <= s_end
     
-    # STEP 6: Decision Logic
+    # STEP 6: Decision Logic with Hindi Support
     status = "PASS"
-    reason = "✅ Conditions are optimal for this crop."
     
     if balance < 0:
         status = "FAIL"
         deficit_pct = int(abs(balance) / water_req * 100)
-        reason = f"❌ Water deficit: {int(abs(balance))}mm ({deficit_pct}% short). WRIS shows groundwater at {gw_depth}m depth."
+        if lang == 'hi':
+            reason = f"❌ पानी की कमी: {int(abs(balance))}mm ({deficit_pct}% कम)। WRIS भूजल स्तर {gw_depth}m गहराई पर दिखाता है।"
+        else:
+            reason = f"❌ Water deficit: {int(abs(balance))}mm ({deficit_pct}% short). WRIS shows groundwater at {gw_depth}m depth."
     elif not in_season:
         status = "FAIL"
-        reason = f"❌ Wrong season. Optimal sowing: {crop['sowing_period']}."
+        if lang == 'hi':
+            reason = f"❌ गलत मौसम। उचित बुवाई का समय: {crop['sowing_period']}।"
+        else:
+            reason = f"❌ Wrong season. Optimal sowing: {crop['sowing_period']}."
     elif wris_data['status'] == 'critical':
         status = "WARNING"
-        reason = f"⚠️ WRIS Alert: Groundwater critically low ({gw_depth}m). Consider drought-resistant crops."
+        if lang == 'hi':
+            reason = f"⚠️ WRIS चेतावनी: भूजल गंभीर रूप से कम ({gw_depth}m)। सूखा प्रतिरोधी फसलों पर विचार करें।"
+        else:
+            reason = f"⚠️ WRIS Alert: Groundwater critically low ({gw_depth}m). Consider drought-resistant crops."
+    else:
+        if lang == 'hi':
+            reason = "✅ इस फसल के लिए परिस्थितियाँ सर्वोत्तम हैं।"
+        else:
+            reason = "✅ Conditions are optimal for this crop."
     
     # STEP 7: Smart Suggestions (Profit-Per-Drop + Season + Water Available)
     suggestions = []
@@ -345,11 +359,12 @@ def get_all_crops():
 
 
 if __name__ == '__main__':
-    print("🚀 Enhanced Backend: AI + NASA + WRIS + Smart Logic")
+    print("🚀 Enhanced Backend: AI + NASA + WRIS + Smart Logic + Hindi Support")
     print("=" * 60)
     print("📡 Data Sources:")
     print("  - NASA POWER: Rainfall, Temperature, Soil Moisture")
     print("  - India-WRIS: Groundwater levels from monitoring stations")
     print("  - AI Model: Random Forest with 4 features")
+    print("  - Languages: English + Hindi")
     print("=" * 60)
     app.run(port=5000, debug=True)

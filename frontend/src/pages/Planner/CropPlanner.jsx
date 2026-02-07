@@ -101,7 +101,11 @@ const CropPlanner = () => {
       location: "Use My Location",
       alternatives: "Best Alternatives",
       reason: "Reason",
-      cultivate: "(Time to cultivate)"
+      cultivate: "(Time to cultivate)",
+      available: "Available",
+      needed: "Needed",
+      balance: "Balance",
+      profitPerDrop: "Profit Per Drop"
     },
     hi: {
       title: "स्मार्ट फसल योजना",
@@ -112,7 +116,11 @@ const CropPlanner = () => {
       location: "मेरी लोकेशन",
       alternatives: "बेहतर विकल्प",
       reason: "कारण",
-      cultivate: "उगने का समय"
+      cultivate: "उगने का समय",
+      available: "उपलब्ध",
+      needed: "आवश्यक",
+      balance: "शेष",
+      profitPerDrop: "प्रति बूंद लाभ"
     }
   }[lang];
 
@@ -142,6 +150,7 @@ const CropPlanner = () => {
           crop: crop.toLowerCase(),
           area,
           district: village.toLowerCase(),
+          lang: lang, // Send language to backend
           ...(coords || {})
         })
       });
@@ -205,15 +214,15 @@ const CropPlanner = () => {
 
             <div className={`alert ${result.status === "PASS" ? "safe" : "danger"}`}>
 
-              <h3>{result.crop_outcome?.message || "Analysis Complete"}</h3>
+              <h3>{result.crop_outcome?.message || (lang === 'hi' ? "विश्लेषण पूर्ण" : "Analysis Complete")}</h3>
 
               <p>
-                💧 Available: {result.water_analysis?.available_mm || 0}mm | 
-                Needed: {result.water_analysis?.needed_mm || 0}mm | 
-                Balance: {result.water_analysis?.balance_mm || 0}mm
+                💧 {t.available}: {result.water_analysis?.available_mm || 0}mm | 
+                {t.needed}: {result.water_analysis?.needed_mm || 0}mm | 
+                {t.balance}: {result.water_analysis?.balance_mm || 0}mm
               </p>
               
-              <p>📊 Profit Per Drop: ₹{result.crop_outcome?.expected_profit && result.water_analysis?.needed_mm 
+              <p>📊 {t.profitPerDrop}: ₹{result.crop_outcome?.expected_profit && result.water_analysis?.needed_mm 
                 ? Math.round(result.crop_outcome.expected_profit / result.water_analysis.needed_mm)
                 : 0}/mm</p>
             </div>
