@@ -70,7 +70,7 @@ const Dashboard = () => {
 
         <div className="info-box">
           <span>
-            {lang === 'hi' ? '💰 अनुमानित लाभ' : '💰 Est Profit'}
+            {lang === 'hi' ? '💰 अनुमानित लाभ' : '💰 Est Profit (on 1 acre Land)'}
           </span>
           <h2>₹{profit.toLocaleString()}</h2>
         </div>

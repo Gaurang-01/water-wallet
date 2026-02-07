@@ -35,7 +35,7 @@
 }
 
 /* language button */
-.lang-toggle {
+.login-right .lang-toggle {
   position: absolute;
   top: 20px;
   right: 20px;
@@ -46,6 +46,11 @@
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
+}
+
+.login-right .lang-toggle:hover {
+  background: #059669;
+  color: white;
 }
 
 /* form card */
@@ -63,7 +68,7 @@
   margin-bottom: 6px;
 }
 
-.subtitle {
+.form-card .subtitle {
   color: #64748b;
   margin-bottom: 24px;
 }
@@ -72,11 +77,14 @@
 .input-group {
   position: relative;
   margin-bottom: 18px;
-}
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}  
 
 .input-group input {
-  width: 100%;
-  padding: 14px 16px 14px 44px;
+  flex: 1;
+  padding: 14px 16px;
   border-radius: 12px;
   border: 2px solid #e5e7eb;
   font-size: 15px;
@@ -87,13 +95,14 @@
   outline: none;
 }
 
-/* icon LEFT aligned */
+/* icon LEFT aligned - outside the input */
 .input-icon {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 18px;
+  font-size: 22px;
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 /* ================= BUTTON ================= */

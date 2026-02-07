@@ -8,11 +8,10 @@ import LandingPage from './pages/Landing/LandingPage.jsx';
 import LoginPage from './pages/Login/LoginPage.jsx';
 import Dashboard from './pages/Dashboard/Dashboard.jsx';
 import CropPlanner from './pages/Planner/CropPlanner.jsx';
-import ProfitCalc from './pages/Profit/ProfitCalc.jsx';
 
 import './App.css';
 
-// App Layout with Navbar
+// App Layout with Navbar (only for /app routes)
 const AppLayout = () => {
   return (
     <div className="app-container">
@@ -32,17 +31,16 @@ const App = () => {
       <Router>
         <Routes>
 
-          {/* Landing */}
+          {/* Landing - NO NAVBAR */}
           <Route path="/" element={<LandingPage />} />
 
-          {/* Login */}
+          {/* Login - NO NAVBAR */}
           <Route path="/login" element={<LoginPage />} />
 
-          {/* App */}
+          {/* App Routes - WITH NAVBAR */}
           <Route path="/app" element={<AppLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="planner" element={<CropPlanner />} />
-            <Route path="profit" element={<ProfitCalc />} />
           </Route>
 
           {/* Redirects */}

@@ -8,6 +8,29 @@ const CROP_OPTIONS = [
   "Cotton","Soybean","Chickpea","Tomato","Onion","Okra"
 ];
 
+/* ================= CROP NAME TRANSLATIONS ================= */
+const cropNameHi = {
+  "Sugarcane": "गन्ना",
+  "Rice": "चावल",
+  "Wheat": "गेहूं",
+  "Maize": "मक्का",
+  "Jowar": "ज्वार",
+  "Bajra": "बाजरा",
+  "Cotton": "कपास",
+  "Soybean": "सोयाबीन",
+  "Chickpea": "चना",
+  "Tomato": "टमाटर",
+  "Onion": "प्याज",
+  "Okra": "भिंडी",
+  "Groundnut": "मूंगफली",
+  "Pigeon Pea": "तुअर",
+  "Green Gram": "मूंग",
+  "Potato": "आलू",
+  "Banana": "केला",
+  "Grapes": "अंगूर",
+  "Turmeric": "हल्दी"
+};
+
 /* ================= TYPE HINDI MAP ================= */
 const cropTypeHi = {
   Veg: "सब्ज़ी",
@@ -15,7 +38,9 @@ const cropTypeHi = {
   Cereal: "अनाज",
   Cash: "नकदी फसल",
   Oil: "तिलहन",
-  Plantation: "बागान"
+  Millet: "बाजरा",
+  Fruit: "फल",
+  Spice: "मसाला"
 };
 
 /* ================= DROPDOWN ================= */
@@ -87,7 +112,7 @@ const CropPlanner = () => {
       location: "मेरी लोकेशन",
       alternatives: "बेहतर विकल्प",
       reason: "कारण",
-      cultivate: "(उगने का समय)"
+      cultivate: "उगने का समय"
     }
   }[lang];
 
@@ -199,35 +224,38 @@ const CropPlanner = () => {
               <>
                 <h3 className="suggest-title">💡 {t.alternatives}</h3>
 
-                {result.recommendations.sort((a, b) => b.profit - a.profit).map((s, i) => (
-                  <div key={i} className="suggest-card">
+                {result.recommendations.sort((a, b) => b.profit - a.profit).map((s, i) => {
+                  // Get Hindi crop name if in Hindi mode
+                  const cropDisplayName = lang === 'hi' 
+                    ? (cropNameHi[s.crop] || s.crop)
+                    : s.crop;
 
-                    <h4>
-                      {lang === 'hi' ? cropTypeHi[s.type] || s.crop : s.crop}
-                    </h4>
+                  return (
+                    <div key={i} className="suggest-card">
 
-                    <div className="meta">
-                      ⏱ {lang === 'hi'
-                        ? `${s.duration} ${t.cultivate}`
-                        : `${s.duration} ${t.cultivate}`}
+                      <h4>{cropDisplayName}</h4>
+
+                      <div className="meta">
+                        ⏱ {s.duration} ({lang === 'hi' ? t.cultivate : 'Time to cultivate'})
+                      </div>
+
+                      <div className="meta">
+                        💰 ₹{s.profit.toLocaleString()}
+                      </div>
+                      
+                      <div className="meta">
+                        💧 PPD: ₹{s.ppd ? s.ppd.toLocaleString() : 0}/mm
+                      </div>
+
+                      <div className="tag">
+                        {s.is_immediate 
+                          ? (lang === 'hi' ? `✨ अभी बोएं (${s.sowing_period})` : s.tag || "✨ Sow Now")
+                          : (lang === 'hi' ? `⏳ ${s.sowing_period} के लिए इंतजार करें` : s.tag || "⏳ Wait")}
+                      </div>
+
                     </div>
-
-                    <div className="meta">
-                      💰 ₹{s.profit.toLocaleString()}
-                    </div>
-                    
-                    <div className="meta">
-                      💧 PPD: ₹{s.ppd ? s.ppd.toLocaleString() : 0}/mm
-                    </div>
-
-                    <div className="tag">
-                      {lang === 'hi'
-                        ? (s.is_immediate ? "✨ अभी बोएं" : "⏳ इंतजार करें")
-                        : s.tag}
-                    </div>
-
-                  </div>
-                ))}
+                  );
+                })}
               </>
             )}
 
